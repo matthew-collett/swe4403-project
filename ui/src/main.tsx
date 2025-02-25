@@ -1,0 +1,19 @@
+import { Suspense, StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { RouterProvider } from 'react-router-dom'
+
+import { LoadingScreen } from '@/components'
+import { router } from '@/config'
+import { ThemeProvider } from '@/context'
+
+import './index.css'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <ThemeProvider>
+      <Suspense fallback={<LoadingScreen />}>
+        <RouterProvider router={router} />
+      </Suspense>
+    </ThemeProvider>
+  </StrictMode>,
+)
