@@ -1,6 +1,6 @@
 import json
 import asyncio
-from .api_client import send_sse_update
+from api_client import send_sse_update
 
 def lambda_handler(event, context):
     loop = asyncio.get_event_loop()
