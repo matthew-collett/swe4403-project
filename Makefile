@@ -69,3 +69,9 @@ ui-clean: ## Clean UI build artifacts
 	@cd $(UI_DIR) && $(RM) dist
 	@cd $(UI_DIR) && $(RM) node_modules
 	$(call success,"ui cleaned!")
+
+.PHONY: api
+api: ## starting api
+	$(call log,"starting api server...")
+	@cd $(API_DIR) && node server.js
+
