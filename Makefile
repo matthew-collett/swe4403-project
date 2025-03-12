@@ -69,3 +69,17 @@ ui-clean: ## Clean UI build artifacts
 	@cd $(UI_DIR) && $(RM) dist
 	@cd $(UI_DIR) && $(RM) node_modules
 	$(call success,"ui cleaned!")
+
+.PHONY: api-install
+api-install: # Install API deps
+	$(call log,"installing api deps...")
+	@cd $(API_DIR) && npm i
+
+.PHONY: api-start
+api-start: ## starting api
+	$(call log,"starting api server...")
+	@cd $(API_DIR) && node server.js
+
+api: api-install api-start ## Install dependencies and start API
+
+
