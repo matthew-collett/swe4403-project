@@ -1,7 +1,7 @@
 import httpx
 import json
 
-API_URL = "http://api-url-here/broadcast"  # Update with actual URL
+API_URL = "http://127.0.0.1:8080/notifier"
 
 async def send_sse_update(message: dict):
     async with httpx.AsyncClient() as client:

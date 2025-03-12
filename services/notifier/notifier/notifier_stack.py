@@ -24,7 +24,6 @@ class NotifierStack(Stack):
             }
         )
 
-        # 🔹 EventBridge Rule: Trigger Notifier Lambda on Incident Events
         event_rule = events.Rule(
             self, "NotifierRule",
             event_pattern={
@@ -32,11 +31,10 @@ class NotifierStack(Stack):
                 "detail-type": ["incident.new", "incident.update", "incident.resolved"]
             },
             event_bus=events.EventBus.from_event_bus_name(self, "EventBus", "DisasterResponseBus")
-        
+        )
         
         event_rule.add_target(targets.LambdaFunction(notifier_lambda))
 
-        # 🔹 Grant Lambda Permission to Read EventBridge Events
         notifier_lambda.add_to_role_policy(iam.PolicyStatement(
             actions=["events:PutEvents"],
             resources=["arn:aws:events:*:*:event-bus/DisasterResponseBus"]
