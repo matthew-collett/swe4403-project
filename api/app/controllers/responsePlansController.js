@@ -1,4 +1,4 @@
-const CosmosDB = require('../app/database/database-singleton')
+const CosmosDB = require('../database/database-singleton')
 
 exports.getResponsePlans = async (req, res) => {
   try {

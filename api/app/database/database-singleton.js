@@ -1,5 +1,5 @@
 const { CosmosClient } = require('@azure/cosmos')
-import config from '#config'
+const config = require('../config/config')
 
 class CosmosDBService {
   static instance = null
