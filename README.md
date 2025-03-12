@@ -19,3 +19,13 @@ if you dont have nvm installed, then install it or just pray that your version i
 ```bash
 make ui
 ```
+
+## API
+
+To run the API:
+
+1. Simply run the below command from the root directory
+
+```bash
+make api
+```

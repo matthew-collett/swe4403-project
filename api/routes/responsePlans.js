@@ -1,8 +1,8 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
 
-const{getResponsePlans} = require('../controllers/responsePlansController');
+const { getResponsePlans } = require('../controllers/responsePlansController')
 
-router.get('/', getResponsePlans);
+router.get('/', getResponsePlans)
 
-module.exports = router;
+module.exports = router
