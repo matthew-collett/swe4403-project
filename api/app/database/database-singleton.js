@@ -1,4 +1,5 @@
 const { CosmosClient } = require('@azure/cosmos')
+import config from '#config'
 
 class CosmosDBService {
   static instance = null
@@ -19,19 +20,22 @@ class CosmosDBService {
   }
 
   static async initializeCosmosClient() {
-    const endpoint = 'your-cosmos-db-endpoint'
-    const key = 'your-cosmos-db-key'
-    const databaseId = 'your-database-id'
+    const endpoint = config.db.cosmos_endpoint
+    const key = config.db.cosmos_key
+    const databaseId = config.db.cosmos_db_id
 
-    // Create a new instance of the Cosmos client
     this.cosmosClient = new CosmosClient({ endpoint, key })
 
-    // Get the database (creates if does not exist)
     const { database } = await this.cosmosClient.databases.createIfNotExists({ id: databaseId })
     this.database = database
 
-    // Initialize containers as needed
-    await this.initializeContainers(['container1', 'container2']) // Add your container IDs here
+    await this.initializeContainers([
+      'Incidents',
+      'Locations',
+      'Resources',
+      'ResponsePlans',
+      'Responses',
+    ])
   }
 
   static async initializeContainers(containerIds) {
