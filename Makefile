@@ -1,22 +1,22 @@
 # Detect OS
 ifeq ($(OS),Windows_NT)
-	DETECTED_OS := Windows
-	# Use PowerShell commands for Windows
-	RM := powershell -Command "Remove-Item -Recurse -Force"
-	MKDIR := powershell -Command "New-Item -ItemType Directory -Force"
-	ECHO := powershell -Command "Write-Host"
-	# Use .cmd extension for scripts on Windows
-	SCRIPT_EXT := .cmd
+    DETECTED_OS := Windows
+    # Use PowerShell commands for Windows
+    RM := powershell -Command "Remove-Item -Recurse -Force"
+    MKDIR := powershell -Command "New-Item -ItemType Directory -Force"
+    ECHO := powershell -Command "Write-Host"
+    # Use .cmd extension for scripts on Windows
+    SCRIPT_EXT := .cmd
 else
-	DETECTED_OS := $(shell uname -s)
-	RM := rm -rf
-	MKDIR := mkdir -p
-	ECHO := echo
-	SCRIPT_EXT := .sh
+    DETECTED_OS := $(shell uname -s)
+    RM := rm -rf
+    MKDIR := mkdir -p
+    ECHO := echo
+    SCRIPT_EXT := .sh
 endif
 
 # Directories
-ROOT_DIR := $(shell pwd)
+ROOT_DIR := .
 UI_DIR := $(ROOT_DIR)/ui
 API_DIR := $(ROOT_DIR)/api
 SERVICES_DIR := $(ROOT_DIR)/services
@@ -24,29 +24,22 @@ SERVICES_DIR := $(ROOT_DIR)/services
 # Tools
 YARN := yarn
 
-# Colors
-CYAN := \033[0;36m
-GREEN := \033[0;32m
-YELLOW := \033[0;33m
-RED := \033[0;31m
-NC := \033[0m # No Color
-
 # Logs
 define log
-	@$(ECHO) "$(CYAN)$(1)$(NC)"
+	@$(ECHO) "$(1)"
 endef
 
 define error
-	@$(ECHO) "$(RED)error: $(1)$(NC)"
+	@$(ECHO) "error: $(1)"
 	@exit 1
 endef
 
 define warning
-	@$(ECHO) "$(YELLOW)warning: $(1)$(NC)"
+	@$(ECHO) "warning: $(1)"
 endef
 
 define success
-	@$(ECHO) "$(GREEN)success: $(1)$(NC)"
+	@$(ECHO) "success: $(1)"
 endef
 
 .PHONY: help
@@ -54,7 +47,7 @@ help: ## Display this help message
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Targets:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
 .PHONY: ui-install
 ui-install: ## Install UI dependencies
