@@ -2,21 +2,15 @@ const { CosmosClient } = require('@azure/cosmos')
 const config = require('../config/config')
 
 class CosmosDBService {
-  static instance = null
   static cosmosClient = null
   static database = null
   static containers = {}
 
-  constructor() {
-    throw new Error('Use CosmosDBService.getInstance()')
-  }
-
   static async getInstance() {
-    if (!this.instance) {
-      this.instance = new CosmosDBService()
+    if (!this.cosmosClient) {
       await this.initializeCosmosClient()
     }
-    return this.instance
+    return this
   }
 
   static async initializeCosmosClient() {
@@ -45,44 +39,43 @@ class CosmosDBService {
     }
   }
 
-  async queryItems(query, containerId) {
-    // Ensure the container exists
-    if (!CosmosDBService.containers[containerId]) {
+  static async queryItems(query, containerId) {
+    if (!this.containers[containerId]) {
       throw new Error(`Container ${containerId} does not exist or has not been initialized.`)
     }
 
-    const container = CosmosDBService.containers[containerId]
+    const container = this.containers[containerId]
     const { resources: items } = await container.items.query(query).fetchAll()
     return items
   }
 
-  async addItem(item, containerId) {
-    if (!CosmosDBService.containers[containerId]) {
+  static async addItem(item, containerId) {
+    if (!this.containers[containerId]) {
       throw new Error(`Container ${containerId} does not exist or has not been initialized.`)
     }
 
-    const container = CosmosDBService.containers[containerId]
+    const container = this.containers[containerId]
     const { resource: addedItem } = await container.items.create(item)
     return addedItem
   }
 
-  async updateItem(itemId, newItem, containerId) {
-    if (!CosmosDBService.containers[containerId]) {
+  static async updateItem(itemId, newItem, containerId) {
+    if (!this.containers[containerId]) {
       throw new Error(`Container ${containerId} does not exist or has not been initialized.`)
     }
-    const container = CosmosDBService.containers[containerId]
+    const container = this.containers[containerId]
     const { resource: updatedItem } = await container
-      .items(itemId, newItem.partitionKey)
+      .item(itemId, newItem.partitionKey)
       .replace(newItem)
     return updatedItem
   }
 
-  async deleteItem(itemId, partitionKey, containerId) {
-    if (!CosmosDBService.containers[containerId]) {
+  static async deleteItem(itemId, partitionKey, containerId) {
+    if (!this.containers[containerId]) {
       throw new Error(`Container ${containerId} does not exist or has not been initialized.`)
     }
-    const container = CosmosDBService.containers[containerId]
-    await container.items(itemId, partitionKey).delete()
+    const container = this.containers[containerId]
+    await container.item(itemId, partitionKey).delete()
   }
 }
 

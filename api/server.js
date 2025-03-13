@@ -3,6 +3,7 @@ const express = require('express')
 const cors = require('cors')
 
 const incidentsRoutes = require('./app/routes/incidents')
+const responsesRoutes = require('./app/routes/responses')
 const resourcesRoutes = require('./app/routes/resources')
 const responsePlansRoutes = require('./app/routes/responsePlans')
 
@@ -12,6 +13,7 @@ app.use(cors())
 app.use(express.json())
 
 app.use('/api/incidents', incidentsRoutes)
+app.use('/api/responses', responsesRoutes)
 app.use('/api/resources', resourcesRoutes)
 app.use('/api/response-plans', responsePlansRoutes)
 
