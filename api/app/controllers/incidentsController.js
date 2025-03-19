@@ -24,6 +24,23 @@ exports.getIncidentById = async (req, res) => {
     res.status(500).json({ error: error.message })
   }
 }
+exports.getIncidentsByStatus = async (req, res) => {
+  try {
+    const { status } = req.params
+    const service = await CosmosDB.getInstance()
+    const incidents = await service.queryItems(
+      `SELECT * FROM c WHERE c.Status = '${status}'`,
+      'Incidents',
+    )
+
+    if (incidents.length === 0) {
+      return res.status(404).json({ message: `No incidents found with status: ${status}` })
+    }
+    res.json(incidents[0])
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
 
 exports.createIncident = async (req, res) => {
   try {
