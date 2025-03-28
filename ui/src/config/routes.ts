@@ -1,4 +1,4 @@
-import { LucideIcon, LayoutDashboard } from 'lucide-react'
+import { LucideIcon, LayoutDashboard, Hammer } from 'lucide-react'
 import { Location, RouteObject } from 'react-router-dom'
 
 interface Route {
@@ -13,7 +13,20 @@ interface AppRoute extends Route {
   icon: LucideIcon
 }
 
-const baseRoutes: Route[] = [
+const authRoutes: Route[] = [
+  {
+    title: 'Login',
+    path: 'login',
+    component: () => import('@/routes/login'),
+  },
+  {
+    title: 'Register',
+    path: 'register',
+    component: () => import('@/routes/register'),
+  },
+]
+
+const publicRoutes: Route[] = [
   {
     title: '404 Not Found',
     path: '*',
@@ -21,25 +34,47 @@ const baseRoutes: Route[] = [
   },
 ]
 
-const appRoutes: AppRoute[] = [
+const protectedRoutes: AppRoute[] = [
   {
     title: 'Dashboard',
-    path: '/',
+    path: 'dashboard',
     icon: LayoutDashboard,
-    description: 'View key metrics and overview of your grid',
-    component: () => import('@/routes/dashboard'),
+    description: 'Idk Yet',
+    component: () => import('@/routes/app/dashboard'),
+  },
+  {
+    title: 'Resources',
+    path: 'resources',
+    icon: Hammer,
+    description: 'Idk yet',
+    component: () => import('@/routes/app/resources'),
   },
 ]
 
-export const routes = [...baseRoutes, ...appRoutes]
+export const routes = [...publicRoutes, ...protectedRoutes, ...authRoutes]
 
-export const getTitle = (pathname: string): string => {
-  const route = routes.find(route => route.path === pathname)
-  return route ? route.title : '404 Not Found'
+export const getTitle = (pathname: string): string | undefined => {
+  const path = pathname.includes('app') ? pathname.split('/app/')[1] : pathname.replace('/', '')
+  const route = routes.find(route => route.path === path)
+  return route?.title
 }
 
-export const isActiveRoute = (path: string, location: Location): boolean =>
-  location.pathname.replace('/', '') === path
+export const isActiveRoute = (path: string, location: Location): boolean => {
+  const appPath = location.pathname.split('/app/')[1]
+  return appPath === path
+}
+
+export const isAppRoute = (route: Route): route is AppRoute =>
+  'icon' in route && 'component' in route && 'description' in route
+
+export const getAppRoute = (pathname: string): AppRoute | undefined => {
+  const path = pathname.includes('app') ? pathname.split('/app/')[1] : pathname.replace('/', '')
+  return [...protectedRoutes].find(route => route.path === path)
+}
+
+export const getAppRoutes = (): AppRoute[] => routes.filter(isAppRoute)
+
+export const getAppPath = (route: AppRoute) => `/app/${route.path}`
 
 export const createRouteConfig = (route: Route): RouteObject => ({
   path: route.path,
@@ -47,4 +82,4 @@ export const createRouteConfig = (route: Route): RouteObject => ({
 })
 
 export type { Route, AppRoute }
-export { baseRoutes, appRoutes }
+export { protectedRoutes, publicRoutes, authRoutes }

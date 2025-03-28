@@ -8,7 +8,7 @@ export const RootLayout = () => {
 
   return (
     <>
-      <title>{`Company | ${title}`}</title>
+      <title>{`Unity Response | ${title}`}</title>
       <Outlet />
     </>
   )
