@@ -62,7 +62,15 @@ class CosmosDBService:
         ))
 
         return items
-
+    
+    @classmethod
+    def read_item(cls, item_id, partition_key, container_id):
+        if container_id not in cls.containers:
+            raise Exception(f"Container {container_id} does not exist or has not been initialized.")
+        container = cls.containers[container_id]
+        response = container.read_item(
+            item=item_id, partition_key=partition_key)
+        return response
     @classmethod
     def add_item(cls, item, container_id):
         if container_id not in cls.containers:
