@@ -45,6 +45,23 @@ class CosmosDBService:
         container = cls.containers[container_id]
         items = list(container.query_items(query=query, enable_cross_partition_query=True))
         return items
+    @classmethod
+    def list_items(cls, field_name, value, container_id):
+        if container_id not in cls.containers:
+            raise Exception(f"Container {container_id} does not exist or has not been initialized.")
+
+        container = cls.containers[container_id]
+
+        query = f"SELECT * FROM c WHERE c.{field_name} = @value"
+        parameters = [{"name": "@value", "value": value}]
+
+        items = list(container.query_items(
+            query=query,
+            parameters=parameters,
+            enable_cross_partition_query=True
+        ))
+
+        return items
 
     @classmethod
     def add_item(cls, item, container_id):
