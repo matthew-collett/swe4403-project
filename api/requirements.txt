@@ -3,3 +3,6 @@ azure-cosmos
 python-dotenv
 zappa
 setuptools
+firebase_admin
+google-cloud-firestore==2.20.1
+flask-cors

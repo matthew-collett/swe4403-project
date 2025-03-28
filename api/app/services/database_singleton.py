@@ -1,6 +1,7 @@
 from azure.cosmos import CosmosClient, PartitionKey
 import os
 
+
 class CosmosDBService:
     cosmos_client = None
     database = None
@@ -17,8 +18,10 @@ class CosmosDBService:
         connection_string = os.getenv('COSMOS_CONNECTION_STRING')
         database_id = os.getenv('COSMOS_DB_ID')
 
-        cls.cosmos_client = CosmosClient.from_connection_string(connection_string)
-        cls.database = cls.cosmos_client.create_database_if_not_exists(id=database_id)
+        cls.cosmos_client = CosmosClient.from_connection_string(
+            connection_string)
+        cls.database = cls.cosmos_client.create_database_if_not_exists(
+            id=database_id)
 
         cls.initialize_containers([
             'Incidents',
@@ -33,22 +36,27 @@ class CosmosDBService:
         for container_id in container_ids:
             container = cls.database.create_container_if_not_exists(
                 id=container_id,
-                partition_key=PartitionKey(path="/id")  # Adjust if you use another partition key
+                # Adjust if you use another partition key
+                partition_key=PartitionKey(path="/id")
             )
             cls.containers[container_id] = container
 
     @classmethod
     def query_items(cls, query, container_id):
         if container_id not in cls.containers:
-            raise Exception(f"Container {container_id} does not exist or has not been initialized.")
+            raise Exception(
+                f"Container {container_id} does not exist or has not been initialized.")
 
         container = cls.containers[container_id]
-        items = list(container.query_items(query=query, enable_cross_partition_query=True))
+        items = list(container.query_items(
+            query=query, enable_cross_partition_query=True))
         return items
+
     @classmethod
     def list_items(cls, field_name, value, container_id):
         if container_id not in cls.containers:
-            raise Exception(f"Container {container_id} does not exist or has not been initialized.")
+            raise Exception(
+                f"Container {container_id} does not exist or has not been initialized.")
 
         container = cls.containers[container_id]
 
@@ -62,19 +70,22 @@ class CosmosDBService:
         ))
 
         return items
-    
+
     @classmethod
     def read_item(cls, item_id, partition_key, container_id):
         if container_id not in cls.containers:
-            raise Exception(f"Container {container_id} does not exist or has not been initialized.")
+            raise Exception(
+                f"Container {container_id} does not exist or has not been initialized.")
         container = cls.containers[container_id]
         response = container.read_item(
             item=item_id, partition_key=partition_key)
         return response
+
     @classmethod
     def add_item(cls, item, container_id):
         if container_id not in cls.containers:
-            raise Exception(f"Container {container_id} does not exist or has not been initialized.")
+            raise Exception(
+                f"Container {container_id} does not exist or has not been initialized.")
 
         container = cls.containers[container_id]
         added_item = container.create_item(body=item)
@@ -83,7 +94,8 @@ class CosmosDBService:
     @classmethod
     def update_item(cls, item_id, new_item, container_id):
         if container_id not in cls.containers:
-            raise Exception(f"Container {container_id} does not exist or has not been initialized.")
+            raise Exception(
+                f"Container {container_id} does not exist or has not been initialized.")
 
         container = cls.containers[container_id]
         updated_item = container.replace_item(item=item_id, body=new_item)
@@ -92,7 +104,8 @@ class CosmosDBService:
     @classmethod
     def delete_item(cls, item_id, partition_key, container_id):
         if container_id not in cls.containers:
-            raise Exception(f"Container {container_id} does not exist or has not been initialized.")
+            raise Exception(
+                f"Container {container_id} does not exist or has not been initialized.")
 
         container = cls.containers[container_id]
         container.delete_item(item=item_id, partition_key=partition_key)

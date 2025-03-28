@@ -1,9 +1,12 @@
 from flask import Blueprint, request, jsonify
 from app.services.database_singleton import CosmosDBService
+from app.middlewares.auth import token_required
 
 resources_bp = Blueprint("resources", __name__)
 
-@resources_bp.route("/", methods=["GET"])
+
+@resources_bp.route("", methods=["GET"])
+@token_required
 def get_resources():
     try:
         service = CosmosDBService.get_instance()
@@ -13,7 +16,9 @@ def get_resources():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@resources_bp.route("/", methods=["POST"])
+
+@resources_bp.route("", methods=["POST"])
+@token_required
 def create_resource():
     try:
         service = CosmosDBService.get_instance()

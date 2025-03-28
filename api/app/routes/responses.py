@@ -1,9 +1,12 @@
 from flask import Blueprint, request, jsonify
 from app.services.database_singleton import CosmosDBService
+from app.middlewares.auth import token_required
 
 responses_bp = Blueprint("responses", __name__)
 
-@responses_bp.route("/", methods=["GET"])
+
+@responses_bp.route("", methods=["GET"])
+@token_required
 def get_responses():
     try:
         service = CosmosDBService.get_instance()
@@ -13,21 +16,24 @@ def get_responses():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@responses_bp.route("/<id>", methods=["GET"])
+
+@responses_bp.route("<id>", methods=["GET"])
+@token_required
 def get_response_by_id(id):
     try:
         service = CosmosDBService.get_instance()
-        query = f"SELECT * FROM c WHERE c.id = '{id}'"
-        responses = service.query_items(query, "Responses")
+        responses = service.read_item(id, "id", "Responses")
 
         if not responses:
             return jsonify({"message": "Response not found"}), 404
 
-        return jsonify(responses[0])
+        return jsonify(responses)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@responses_bp.route("/", methods=["POST"])
+
+@responses_bp.route("", methods=["POST"])
+@token_required
 def create_response():
     try:
         service = CosmosDBService.get_instance()
@@ -36,7 +42,9 @@ def create_response():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@responses_bp.route("/<id>", methods=["PUT"])
+
+@responses_bp.route("<id>", methods=["PUT"])
+@token_required
 def update_response(id):
     try:
         service = CosmosDBService.get_instance()
@@ -45,7 +53,9 @@ def update_response(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@responses_bp.route("/<id>", methods=["DELETE"])
+
+@responses_bp.route("<id>", methods=["DELETE"])
+@token_required
 def delete_response(id):
     try:
         service = CosmosDBService.get_instance()

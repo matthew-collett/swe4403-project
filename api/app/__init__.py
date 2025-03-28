@@ -1,10 +1,14 @@
+
 from flask import Flask
+from flask_cors import CORS
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 
 def create_app():
     app = Flask(__name__)
+
+    CORS(app, resources={r"/*": {"origins": "*"}})
 
     from app.routes.incidents import incidents_bp
     from app.routes.resources import resources_bp
@@ -14,5 +18,6 @@ def create_app():
     app.register_blueprint(resources_bp, url_prefix='/resources')
     app.register_blueprint(response_plans_bp, url_prefix='/response_plans')
     app.register_blueprint(responses_bp, url_prefix='/responses')
+    from app import firebase
 
     return app
