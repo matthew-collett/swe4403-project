@@ -1,5 +1,5 @@
-from azure.cosmos import CosmosClient, PartitionKey, exceptions
-from flask import current_app
+from azure.cosmos import CosmosClient, PartitionKey
+import os
 
 class CosmosDBService:
     cosmos_client = None
@@ -14,8 +14,8 @@ class CosmosDBService:
 
     @classmethod
     def initialize_cosmos_client(cls):
-        connection_string = current_app.config['COSMOS_CONNECTION_STRING']
-        database_id = current_app.config['COSMOS_DB_ID']
+        connection_string = os.getenv('COSMOS_CONNECTION_STRING')
+        database_id = os.getenv('COSMOS_DB_ID')
 
         cls.cosmos_client = CosmosClient.from_connection_string(connection_string)
         cls.database = cls.cosmos_client.create_database_if_not_exists(id=database_id)
