@@ -11,11 +11,11 @@ export type Incident = {
 }
 
 export enum IncidentType {
-  FIRE,
-  MEDICAL,
-  INFRASTRUCTURE,
-  HAZMAT,
-  NATURAL_DISASTER,
+  FIRE = 'Fire',
+  MEDICAL = 'Medical',
+  INFRASTRUCTURE = 'Infrastructure',
+  HAZMAT = 'Hazmat',
+  NATURAL_DISASTER = 'Natural Disaster',
 }
 
 export enum SeverityType {

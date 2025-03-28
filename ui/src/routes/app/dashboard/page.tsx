@@ -8,13 +8,14 @@ import { getAppRoute } from '@/config'
 import { auth } from '@/lib'
 import { api } from '@/lib/api'
 import { Incident } from '@/types'
-
+import IncidentForm from '@/components/incident-form'
+import { Button } from '@/components/ui/button'
 const DashboardPage = () => {
   const location = useLocation()
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null)
   const [openIncidents, setOpenIncidents] = useState<Incident[]>([])
   const [closedIncidents, setClosedIncidents] = useState<Incident[]>([])
-
+  const [showForm, setShowForm] = useState(false)
   useEffect(() => {
     const fetchIncidents = async () => {
       try {
@@ -47,6 +48,14 @@ const DashboardPage = () => {
     <>
       <PageTitle route={getAppRoute(location.pathname)} />
       <div className="space-y-5">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Current Resources</h2>
+          <Button onClick={() => setShowForm(!showForm)}>
+            {showForm ? 'Cancel' : 'Add Resource'}
+          </Button>
+        </div>
+
+        {showForm && <IncidentForm />}
         <DashboardSection title="Active Incidents">
           <IncidentTable
             incidents={openIncidents}
