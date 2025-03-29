@@ -1,8 +1,8 @@
-from strategies.fire_strategy import FireAllocationStrategy
-from strategies.hazmat_strategy import HazmatAllocationStrategy
-from strategies.infrastructure_strategy import InfrastructureAllocationStrategy
-from strategies.medical_strategy import MedicalAllocationStrategy
-from strategies.natural_disaster_strategy import NaturalDisasterAllocationStrategy
+from strategies.fire_strategy import FireStrategy
+from strategies.hazmat_strategy import HazmatStrategy
+from strategies.infrastructure_strategy import InfrastructureStrategy
+from strategies.medical_strategy import MedicalStrategy
+from strategies.natural_disaster_strategy import NaturalDisasterStrategy
 
 class StrategyFactory:
     @staticmethod
@@ -10,11 +10,11 @@ class StrategyFactory:
         incident_type = incident_type.upper()
 
         strategies = {
-            'FIRE': FireAllocationStrategy,
-            'HAZMAT': HazmatAllocationStrategy,
-            'INFRASTRUCTURE': InfrastructureAllocationStrategy,
-            'MEDICAL': MedicalAllocationStrategy,
-            'NATURAL_DISASTER': NaturalDisasterAllocationStrategy,
+            'FIRE': FireStrategy,
+            'HAZMAT': HazmatStrategy,
+            'INFRASTRUCTURE': InfrastructureStrategy,
+            'MEDICAL': MedicalStrategy,
+            'NATURAL_DISASTER': NaturalDisasterStrategy,
         }
 
         strategy = strategies.get(incident_type)

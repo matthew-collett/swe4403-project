@@ -8,7 +8,7 @@ class FirebaseAuthManager:
     def __init__(self, service_uid: str):
         self.service_uid = service_uid
         self.api_key = os.getenv("FIREBASE_API_KEY")
-        self.cred_path = "./firebase_admin_sdk.json"
+        self.cred_path = "/opt/allocator/auth/firebase-service-account.json"
         self.id_token = None
         self.token_expiry = 0
 

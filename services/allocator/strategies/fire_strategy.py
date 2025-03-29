@@ -1,6 +1,6 @@
-from allocation_strategy import AllocationStrategy
-from services.allocator.strategies.resource_requirements import resource_requirements
-from utils import check_and_allocation
+from strategies.allocation_strategy import AllocationStrategy
+from strategies.resource_requirements import resource_requirements
+from strategies.utils import check_and_allocation
 
 class FireStrategy(AllocationStrategy):
     def allocate(self, incident, inventory):
