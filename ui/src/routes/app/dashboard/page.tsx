@@ -49,9 +49,9 @@ const DashboardPage = () => {
       <PageTitle route={getAppRoute(location.pathname)} />
       <div className="space-y-5">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Current Resources</h2>
+          <h2 className="text-xl font-semibold">Incidents</h2>
           <Button onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Cancel' : 'Add Resource'}
+            {showForm ? 'Cancel' : 'New Incident'}
           </Button>
         </div>
 

@@ -52,6 +52,7 @@ def get_incidents_by_status():
 
 
 @incidents_bp.route("", methods=["POST"])
+@token_required
 def create_incident():
     try:
         service = CosmosDBService.get_instance()

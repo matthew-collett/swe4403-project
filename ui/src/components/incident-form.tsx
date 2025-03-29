@@ -1,10 +1,13 @@
 import { IncidentType, SeverityType, StatusType } from '@/types/api'
-
+import { auth } from '@/lib'
+import { api } from '@/lib/api'
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { Incident } from '@/types'
+import { v4 as uuidv4 } from 'uuid'
 import {
   Select,
   SelectContent,
@@ -33,9 +36,29 @@ const IncidentForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('New Incident Submitted:', formData)
+
+    const incident = {
+      id: uuidv4(),
+      type: formData.type,
+      severity: formData.severity,
+      status: formData.status,
+      address: formData.address,
+      description: formData.description,
+      reportedAt: new Date().toISOString(),
+      lastUpdatedAt: new Date().toISOString(),
+    }
+    const incidentJson = JSON.stringify(incident)
+
+    try {
+      const token = await auth.currentUser?.getIdToken()
+      const response = await api.post('/incidents', token, incidentJson)
+
+      console.log('Incident created:', response)
+    } catch (error) {
+      console.error('Error submitting incident:', error)
+    }
   }
 
   return (
