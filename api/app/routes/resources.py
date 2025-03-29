@@ -26,3 +26,5 @@ def create_resource():
         return jsonify(new_resource), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
