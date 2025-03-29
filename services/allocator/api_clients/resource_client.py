@@ -21,3 +21,9 @@ class ResourceClient:
         response = requests.post(url, json=payload, timeout=10)
         response.raise_for_status()
         return response.json()
+
+    def get_resources(self):
+        url = f"{self.base_url}/resources"
+        response = requests.get(url, headers=self._headers(), timeout=10)
+        response.raise_for_status()
+        return response.json()
