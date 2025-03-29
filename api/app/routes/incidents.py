@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
 from app.services.database_singleton import CosmosDBService
 from app.middlewares.auth import token_required
+from app.factories.incident_factory import IncidentFactory
+from app.services.resource_allocator import ResourceAllocator
 
 incidents_bp = Blueprint("incidents", __name__)
 
@@ -50,18 +52,6 @@ def get_incidents_by_status():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-@incidents_bp.route("", methods=["POST"])
-@token_required
-def create_incident():
-    try:
-        service = CosmosDBService.get_instance()
-        new_incident = service.add_item(request.json, "Incidents")
-        return jsonify(new_incident), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 @incidents_bp.route("<string:id>", methods=["PUT"])
 @token_required
 def update_incident(id):
@@ -78,8 +68,25 @@ def update_incident(id):
 def delete_incident(id):
     try:
         service = CosmosDBService.get_instance()
-        # Assuming 'id' is the partition key
         service.delete_item(id, id, "Incidents")
         return jsonify({"message": "Incident deleted"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@incidents_bp.route("", methods=["POST"])
+@token_required
+def create_incident():
+    try:
+        data = request.json
+        incident = IncidentFactory.create_incident(data)
+
+        allocated_resources = ResourceAllocator.allocate(incident["type"], incident)
+        incident["resources"] = allocated_resources["resources"]
+
+        service = CosmosDBService.get_instance()
+        new_incident = service.add_item(incident, "Incidents")
+        return jsonify(new_incident), 201
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
