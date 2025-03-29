@@ -16,7 +16,9 @@ dist-ssr
 *.sw?
 
 .env
+config.env
 venv
 **/__pycache__/
 **/zappa_settings.json
 **/firebase-service-account.json
+*.pem
