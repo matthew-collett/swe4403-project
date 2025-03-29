@@ -11,13 +11,19 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui'
 import { useNotifications } from '@/hooks'
-import { useMarkNotification } from '@/hooks'
 import { Notification } from '@/types'
 
 export const NotificationBell = () => {
   const notifications = useNotifications()
-  const { markNotificationAsRead } = useMarkNotification()
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
+
+  const markNotificationAsRead = (notificationId: string) => {
+    notifications.forEach(n => {
+      if (n.id === notificationId) {
+        n.read = true
+      }
+    })
+  }
 
   const handleNotificationClick = (notification: Notification) => {
     setSelectedNotification(notification)
@@ -46,7 +52,6 @@ export const NotificationBell = () => {
             <span className="sr-only">Notifications</span>
           </Button>
         </DropdownMenuTrigger>
-
         <DropdownMenuContent
           align="end"
           className="bg-popover text-popover-foreground border border-border shadow-lg"
@@ -64,21 +69,16 @@ export const NotificationBell = () => {
                 }`}
                 onClick={() => handleNotificationClick(n)}
               >
-                <span className="font-medium">{n.message}</span>
+                <span className="font-medium">{n.title}</span>
+                <span className="text-sm">{n.message}</span>
                 <small className="text-muted-foreground">
-                  {n.start_time
-                    ? new Date(n.start_time.seconds * 1000).toLocaleString() + ' - '
-                    : 'No start time'}
-                  {n.end_time
-                    ? new Date(n.end_time.seconds * 1000).toLocaleString()
-                    : 'No end time'}
+                  {n.start_time ? new Date(n.start_time).toLocaleString() : 'No time available'}
                 </small>
               </DropdownMenuItem>
             ))
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-
       <NotificationModal
         notification={selectedNotification}
         onClose={() => setSelectedNotification(null)}

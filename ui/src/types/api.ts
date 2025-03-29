@@ -16,6 +16,12 @@ export type Resource = {
   category: ResourceCategory
 }
 
+export type IncidentUpdate = {
+  id: string
+  status: StatusType
+  updatedAt: string
+}
+
 export enum IncidentType {
   FIRE = 'Fire',
   MEDICAL = 'Medical',
@@ -32,9 +38,8 @@ export enum SeverityType {
 }
 
 export enum StatusType {
-  OPEN = 'Open',
-  CLOSED = 'Closed',
   PENDING = 'Pending',
+  ACTIVE = 'Active',
   RESOLVED = 'Resolved',
 }
 

@@ -28,16 +28,10 @@ export const NotificationModal = ({ notification, onClose }: NotificationModalPr
         </DialogHeader>
         <div className="mt-2 text-sm text-muted-foreground">
           <p>
-            <strong>Start:</strong>{' '}
+            <strong>Time:</strong>{' '}
             {notification.start_time
-              ? new Date(notification.start_time.seconds * 1000).toLocaleString()
-              : 'No start time'}
-          </p>
-          <p>
-            <strong>End:</strong>{' '}
-            {notification.end_time
-              ? new Date(notification.end_time.seconds * 1000).toLocaleString()
-              : 'No end time'}
+              ? new Date(notification.start_time).toLocaleString()
+              : 'No time available'}
           </p>
         </div>
         <DialogClose asChild>

@@ -1,10 +1,9 @@
-import { Timestamp } from '@firebase/firestore'
-
 export type Notification = {
   id: string
-  userId: string
+  uid: string
+  title: string
   message: string
-  start_time: Timestamp
-  end_time: Timestamp
   read: boolean
+  start_time: number
+  type: string
 }

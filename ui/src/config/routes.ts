@@ -28,6 +28,11 @@ const authRoutes: Route[] = [
 
 const publicRoutes: Route[] = [
   {
+    title: 'Root',
+    path: '/',
+    component: () => import('@/routes/root'),
+  },
+  {
     title: '404 Not Found',
     path: '*',
     component: () => import('@/routes/not-found'),

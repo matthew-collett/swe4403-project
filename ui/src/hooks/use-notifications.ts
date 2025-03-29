@@ -1,46 +1,41 @@
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  onSnapshot,
-  limit,
-  orderBy,
-} from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useAuth } from '@/context'
+import { useMqtt } from '@/context/mqtt-provider'
 import { Notification } from '@/types'
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([])
-  const db = getFirestore()
   const { user } = useAuth()
+  const { incidents, connectionStatus } = useMqtt()
 
   useEffect(() => {
-    if (!user) return
-    const q = query(
-      collection(db, 'notifications'),
-      where('uid', '==', user.uid),
-      orderBy('start_time', 'desc'),
-      limit(10),
-    )
-    try {
-      const unsubscribe = onSnapshot(q, snapshot => {
-        const newNotifs: Notification[] = snapshot.docs.map(doc => {
-          const data = doc.data() as Omit<Notification, 'id'>
-          return { id: doc.id, ...data }
-        })
-        setNotifications(newNotifs)
-      })
+    if (!user || connectionStatus !== 'connected') return
 
-      return () => unsubscribe()
+    try {
+      const notificationsList = Object.values(incidents)
+        .map(
+          incident =>
+            ({
+              id: `notification-${incident.id}`,
+              uid: user.uid,
+              title: `Incident ${incident.status}`,
+              message: `${incident.type} at ${incident.address}`,
+              read: false,
+              start_time: incident.lastUpdatedAt.getTime(),
+              type: 'incident_update',
+            }) as Notification,
+        )
+        .sort((a, b) => b.start_time - a.start_time)
+        .slice(0, 10)
+
+      setNotifications(notificationsList)
     } catch (error) {
-      toast.error('Failed to fetch notifications')
+      toast.error('Failed to process notifications')
       console.error(error)
     }
-  }, [db, user])
+  }, [incidents, user, connectionStatus])
 
   return notifications
 }

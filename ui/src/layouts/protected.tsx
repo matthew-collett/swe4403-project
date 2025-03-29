@@ -1,7 +1,12 @@
 import { Navigate, Outlet } from 'react-router-dom'
 
 import { LoadingScreen } from '@/components'
-import { MqttProvider, useAuth } from '@/context'
+import { MqttProvider, useAuth, useMqtt } from '@/context'
+
+const ReadIncidents = () => {
+  useMqtt()
+  return null
+}
 
 export const Protected = () => {
   const { user, loading } = useAuth()
@@ -16,6 +21,7 @@ export const Protected = () => {
 
   return (
     <MqttProvider>
+      <ReadIncidents />
       <Outlet />
     </MqttProvider>
   )

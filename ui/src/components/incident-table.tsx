@@ -1,3 +1,5 @@
+import { Fragment } from 'react'
+
 import IncidentExpandedRow from './incident-expanded-row'
 
 import { IncidentBadge } from '@/components/incident-badge'
@@ -33,9 +35,8 @@ const IncidentTable = ({ incidents, expandedRowId, toggleExpandedRow }: Incident
 
       <TableBody>
         {incidents.map(incident => (
-          <>
+          <Fragment key={incident.id}>
             <TableRow
-              key={incident.id}
               onClick={() => toggleExpandedRow(incident.id)}
               className="cursor-pointer hover:bg-muted/50 transition"
             >
@@ -50,9 +51,8 @@ const IncidentTable = ({ incidents, expandedRowId, toggleExpandedRow }: Incident
                 {incident.address}
               </TableCell>
             </TableRow>
-
             {expandedRowId === incident.id && <IncidentExpandedRow incident={incident} />}
-          </>
+          </Fragment>
         ))}
       </TableBody>
     </Table>
