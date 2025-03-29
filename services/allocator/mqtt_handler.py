@@ -2,29 +2,36 @@ import os
 import json
 import certifi
 import paho.mqtt.client as mqtt
-from resource_allocator import allocate_resources
+from resource_allocator import allocate_new_incident, allocate_status_update
 
 BROKER_HOST = os.getenv('MQTT_BROKER_HOST')
 BROKER_PORT = int(os.getenv('MQTT_BROKER_PORT'))
-MQTT_TOPIC = os.getenv('MQTT_TOPIC')
 MQTT_USERNAME = os.getenv('MQTT_USERNAME')
 MQTT_PASSWORD = os.getenv('MQTT_PASSWORD')
 
 def on_connect(client, userdata, flags, rc, props):
     if rc == 0:
+        client.subscribe("incidents/new")
+        client.subscribe("incidents/+/status")
         print("Connected to HiveMQ")
-        client.subscribe(MQTT_TOPIC)
     else:
         print(f"MQTT connection failed with code {rc}")
 
 def on_message(client, userdata, msg):
     try:
-        payload = msg.payload.decode("utf-8")
-        print(f"Received: {payload}")
-        incident_data = json.loads(payload)
-        allocate_resources(incident_data)
+        topic = msg.topic
+        payload = json.loads(msg.payload.decode("utf-8"))
+        print(f"Message received on {topic}: {payload}")
+
+        if topic == "incidents/new":
+            allocate_new_incident(payload)
+        elif topic.startswith("incidents/") and topic.endswith("/status"):
+            allocate_status_update(payload)
+        else:
+            print(f"Ignored message on topic: {topic}")
+
     except Exception as e:
-        print(f"Message handling error: {e}")
+        print(f"Error handling message: {e}")
 
 def build_client():
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)

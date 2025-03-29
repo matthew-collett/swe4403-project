@@ -14,3 +14,11 @@ def allocate_resources(incident_data):
     except Exception as e:
         print(f"Error during allocation: {e}")
  
+def allocate_new_incident(incident_data):
+    print("Handling new incident:", incident_data)
+    
+    
+def allocate_status_update(status_data):
+    print("Handling status update:", status_data)
+    # Your logic for reacting to incident status changes
+
