@@ -52,21 +52,6 @@ def get_incidents_by_status():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-<<<<<<< Updated upstream
-
-@incidents_bp.route("", methods=["POST"])
-@token_required
-def create_incident():
-    try:
-        service = CosmosDBService.get_instance()
-        new_incident = service.add_item(request.json, "Incidents")
-        return jsonify(new_incident), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-=======
->>>>>>> Stashed changes
 @incidents_bp.route("<string:id>", methods=["PUT"])
 @token_required
 def update_incident(id):

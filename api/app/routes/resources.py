@@ -27,4 +27,24 @@ def create_resource():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+@resources_bp.route("/allocate", methods=["PUT"])
+@token_required
+def allocate_resources():
+    try:
+        data = request.json
+        resource_ids = data.get("resource_ids")
+        incident_id = data.get("incident_id")
+
+        service = CosmosDBService.get_instance()
+
+        for resource_id in resource_ids:
+            resource = service.read_item(resource_id, resource_id, "Resources")
+
+            resource["isAssigned"] = True
+            resource["incidentId"] = incident_id
+
+            service.update_item(resource_id, resource, "Resources")
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
