@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Incident } from '@/types'
 import { v4 as uuidv4 } from 'uuid'
 import {
   Select,
@@ -43,7 +42,7 @@ const IncidentForm = () => {
       id: uuidv4(),
       type: formData.type,
       severity: formData.severity,
-      status: formData.status,
+      status: StatusType.OPEN,
       address: formData.address,
       description: formData.description,
       reportedAt: new Date().toISOString(),
@@ -101,22 +100,6 @@ const IncidentForm = () => {
           </div>
 
           <div className="grid gap-2">
-            <Label>Status</Label>
-            <Select onValueChange={val => handleSelectChange('status', val)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(StatusType).map(value => (
-                  <SelectItem key={value} value={value}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid gap-2">
             <Label>Address</Label>
             <Input name="address" value={formData.address} onChange={handleChange} />
           </div>
@@ -124,16 +107,6 @@ const IncidentForm = () => {
           <div className="grid gap-2">
             <Label>Description</Label>
             <Textarea name="description" value={formData.description} onChange={handleChange} />
-          </div>
-
-          <div className="grid gap-2">
-            <Label>Reported At</Label>
-            <Input
-              type="datetime-local"
-              name="reportedAt"
-              value={formData.reportedAt}
-              onChange={handleChange}
-            />
           </div>
 
           <Button type="submit" className="mt-2">

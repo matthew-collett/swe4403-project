@@ -15,22 +15,20 @@ const DashboardPage = () => {
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null)
   const [openIncidents, setOpenIncidents] = useState<Incident[]>([])
   const [closedIncidents, setClosedIncidents] = useState<Incident[]>([])
+  const [pendingIncidents, setPendingIncidents] = useState<Incident[]>([])
   const [showForm, setShowForm] = useState(false)
   useEffect(() => {
     const fetchIncidents = async () => {
       try {
         const token = await auth.currentUser?.getIdToken()
-        const [openResponse, closedResponse] = await Promise.all([
-          api.get('/incidents/status?status=open', token),
-          api.get('/incidents/status?status=closed', token),
-        ])
+        const response = await api.get('/incidents', token)
 
-        if (openResponse.status === 200) {
-          setOpenIncidents(openResponse.data as Incident[])
-        }
+        if (response.status === 200) {
+          const allIncidents = response.data as Incident[]
 
-        if (closedResponse.status === 200) {
-          setClosedIncidents(closedResponse.data as Incident[])
+          setOpenIncidents(allIncidents.filter(i => i.status === 'Open'))
+          setClosedIncidents(allIncidents.filter(i => i.status === 'Closed'))
+          setPendingIncidents(allIncidents.filter(i => i.status === 'Pending'))
         }
       } catch (error) {
         console.error('Failed to fetch incidents:', error)
@@ -57,18 +55,39 @@ const DashboardPage = () => {
 
         {showForm && <IncidentForm />}
         <DashboardSection title="Active Incidents">
-          <IncidentTable
-            incidents={openIncidents}
-            expandedRowId={expandedRowId}
-            toggleExpandedRow={toggleExpandedRow}
-          />
+          {openIncidents.length > 0 ? (
+            <IncidentTable
+              incidents={openIncidents}
+              expandedRowId={expandedRowId}
+              toggleExpandedRow={toggleExpandedRow}
+            />
+          ) : (
+            <p className="text-muted-foreground italic text-sm">No active incidents found.</p>
+          )}
         </DashboardSection>
+
+        <DashboardSection title="Pending Incidents">
+          {pendingIncidents.length > 0 ? (
+            <IncidentTable
+              incidents={pendingIncidents}
+              expandedRowId={expandedRowId}
+              toggleExpandedRow={toggleExpandedRow}
+            />
+          ) : (
+            <p className="text-muted-foreground italic text-sm">No pending incidents.</p>
+          )}
+        </DashboardSection>
+
         <DashboardSection title="Recent Resolved Incidents" titleRight="shows last 10">
-          <IncidentTable
-            incidents={closedIncidents}
-            expandedRowId={expandedRowId}
-            toggleExpandedRow={toggleExpandedRow}
-          />
+          {closedIncidents.length > 0 ? (
+            <IncidentTable
+              incidents={closedIncidents}
+              expandedRowId={expandedRowId}
+              toggleExpandedRow={toggleExpandedRow}
+            />
+          ) : (
+            <p className="text-muted-foreground italic text-sm">No resolved incidents found.</p>
+          )}
         </DashboardSection>
       </div>
     </>

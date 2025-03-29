@@ -10,6 +10,12 @@ export type Incident = {
   lastUpdatedAt: Date
 }
 
+export type Resource = {
+  id: string
+  type: ResourceType
+  category: ResourceCategory
+}
+
 export enum IncidentType {
   FIRE = 'Fire',
   MEDICAL = 'Medical',
