@@ -41,6 +41,31 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
       return
     }
 
+    // Initial fetch of all incidents
+    const loadInitialIncidents = async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken()
+        const { status, data } = await api.get('/incidents', token)
+
+        if (status === 200) {
+          const incidentMap = (data as Incident[]).reduce(
+            (acc, incident) => {
+              acc[incident.id] = incident
+              return acc
+            },
+            {} as Record<string, Incident>,
+          )
+
+          setIncidents(incidentMap)
+        }
+      } catch (error) {
+        console.error('Failed to load initial incidents:', error)
+      }
+    }
+
+    loadInitialIncidents()
+
+    // Set up MQTT connection
     setConnectionStatus('connecting')
     const clientId = 'clientId-' + Math.random().toString(16).substring(2, 8)
     const host = import.meta.env.VITE_MQTT_HOST as string
@@ -104,11 +129,25 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
   }, [user, fetchIncident])
 
   const createIncident = useCallback(
-    (incident: IncidentUpdate) => {
+    async (incident: IncidentUpdate) => {
       if (!client || !user) return
+
+      // Publish to the incidents/new topic
+      client.publish('incidents/new', JSON.stringify(incident))
+
+      // Also publish to the status topic to ensure it triggers the message handler
       client.publish(`incidents/${incident.id}/status`, JSON.stringify(incident))
+
+      // For immediate UI feedback, fetch the incident directly and add it to state
+      const newIncident = await fetchIncident(incident.id)
+      if (newIncident) {
+        setIncidents(prev => ({
+          ...prev,
+          [incident.id]: newIncident,
+        }))
+      }
     },
-    [client, user],
+    [client, user, fetchIncident],
   )
 
   const updateIncidentStatus = useCallback(

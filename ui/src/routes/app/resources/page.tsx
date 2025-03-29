@@ -1,7 +1,10 @@
+import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { useMemo, useState, useEffect } from 'react'
+
 import { PageTitle } from '@/components'
-import { getAppRoute } from '@/config'
+import ResourceForm from '@/components/resource-form'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
@@ -11,12 +14,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import ResourceForm from '@/components/resource-form'
-import { Resource, ResourceCategory } from '@/types/api'
+import { getAppRoute } from '@/config'
 import { auth } from '@/lib'
 import { api } from '@/lib/api'
+import { Resource, ResourceCategory } from '@/types/api'
 
 const ResourcesPage = () => {
   const location = useLocation()

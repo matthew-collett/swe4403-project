@@ -14,23 +14,14 @@ import { useNotifications } from '@/hooks'
 import { Notification } from '@/types'
 
 export const NotificationBell = () => {
-  const notifications = useNotifications()
+  const { notifications, markAsRead } = useNotifications()
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
-
-  const markNotificationAsRead = (notificationId: string) => {
-    notifications.forEach(n => {
-      if (n.id === notificationId) {
-        n.read = true
-      }
-    })
-  }
 
   const handleNotificationClick = (notification: Notification) => {
     setSelectedNotification(notification)
     try {
       if (!notification.read) {
-        console.log(notification.id)
-        markNotificationAsRead(notification.id)
+        markAsRead(notification.id)
       }
     } catch (error) {
       toast.error('error loading notifications')

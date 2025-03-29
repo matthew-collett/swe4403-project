@@ -1,12 +1,10 @@
-import { IncidentType, SeverityType, StatusType } from '@/types/api'
-import { auth } from '@/lib'
-import { api } from '@/lib/api'
-import { useState } from 'react'
+import { ChangeEvent, FormEvent, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
-import { v4 as uuidv4 } from 'uuid'
 import {
   Select,
   SelectContent,
@@ -14,9 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Textarea } from '@/components/ui/textarea'
+import { useMqtt } from '@/context'
+import { auth } from '@/lib'
+import { api } from '@/lib/api'
+import { IncidentType, SeverityType, StatusType } from '@/types/api'
 
 const IncidentForm = () => {
+  const { createIncident } = useMqtt()
   const [formData, setFormData] = useState({
     type: '',
     severity: '',
@@ -26,7 +29,7 @@ const IncidentForm = () => {
     reportedAt: '',
   })
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
@@ -35,14 +38,14 @@ const IncidentForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
     const incident = {
       id: uuidv4(),
       type: formData.type,
       severity: formData.severity,
-      status: StatusType.OPEN,
+      status: StatusType.PENDING,
       address: formData.address,
       description: formData.description,
       reportedAt: new Date().toISOString(),
@@ -53,6 +56,12 @@ const IncidentForm = () => {
     try {
       const token = await auth.currentUser?.getIdToken()
       const response = await api.post('/incidents', token, incidentJson)
+      createIncident({
+        id: incident.id,
+        status: incident.status,
+        updatedAt: incident.lastUpdatedAt,
+      })
+      window.location.reload()
 
       console.log('Incident created:', response)
     } catch (error) {

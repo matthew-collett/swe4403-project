@@ -10,23 +10,36 @@ export const useNotifications = () => {
   const { user } = useAuth()
   const { incidents, connectionStatus } = useMqtt()
 
+  const [readIds, setReadIds] = useState<string[]>(() => {
+    if (typeof window === 'undefined' || !user) return []
+
+    const stored = localStorage.getItem(`notification-read-${user.uid}`)
+    return stored ? JSON.parse(stored) : []
+  })
+
+  useEffect(() => {
+    if (!user) return
+    localStorage.setItem(`notification-read-${user.uid}`, JSON.stringify(readIds))
+  }, [readIds, user])
+
   useEffect(() => {
     if (!user || connectionStatus !== 'connected') return
 
     try {
       const notificationsList = Object.values(incidents)
-        .map(
-          incident =>
-            ({
-              id: `notification-${incident.id}`,
-              uid: user.uid,
-              title: `Incident ${incident.status}`,
-              message: `${incident.type} at ${incident.address}`,
-              read: false,
-              start_time: incident.lastUpdatedAt.getTime(),
-              type: 'incident_update',
-            }) as Notification,
-        )
+        .map(incident => {
+          const notifId = `notification-${incident.id}`
+
+          return {
+            id: notifId,
+            uid: user.uid,
+            title: `Incident ${incident.status}`,
+            message: `${incident.type} at ${incident.address}`,
+            read: readIds.includes(notifId),
+            start_time: new Date(incident.lastUpdatedAt).getTime(),
+            type: 'incident_update',
+          } as Notification
+        })
         .sort((a, b) => b.start_time - a.start_time)
         .slice(0, 10)
 
@@ -35,7 +48,13 @@ export const useNotifications = () => {
       toast.error('Failed to process notifications')
       console.error(error)
     }
-  }, [incidents, user, connectionStatus])
+  }, [incidents, user, connectionStatus, readIds])
 
-  return notifications
+  const markAsRead = (id: string) => {
+    if (!readIds.includes(id)) {
+      setReadIds(prev => [...prev, id])
+    }
+  }
+
+  return { notifications, markAsRead }
 }
