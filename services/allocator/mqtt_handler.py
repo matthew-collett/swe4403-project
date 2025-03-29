@@ -29,7 +29,6 @@ def on_message(client, userdata, msg):
             allocate_status_update(payload)
         else:
             print(f"Ignored message on topic: {topic}")
-
     except Exception as e:
         print(f"Error handling message: {e}")
 
