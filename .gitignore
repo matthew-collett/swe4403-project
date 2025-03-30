@@ -22,3 +22,9 @@ venv
 **/zappa_settings.json
 **/firebase-service-account.json
 *.pem
+.firebase/
+.firebaserc
+firebase.json
+
+
+
