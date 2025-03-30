@@ -32,7 +32,6 @@ export enum IncidentType {
 }
 
 export enum SeverityType {
-  CRITICAL = 'Critical',
   HIGH = 'High',
   LOW = 'Low',
   MEDIUM = 'Medium',
