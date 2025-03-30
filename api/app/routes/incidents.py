@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.services.database_singleton import CosmosDBService
 from app.middlewares.auth import token_required
-from app.patterns.incident_factory import IncidentFactory
 
 incidents_bp = Blueprint("incidents", __name__)
 
@@ -77,15 +76,8 @@ def delete_incident(id):
 def create_incident():
     try:
         data = request.json
-        incident = IncidentFactory.create_incident(data)
-
-        allocated_resources = ResourceAllocator.allocate(incident["type"], incident)
-        incident["resources"] = allocated_resources["resources"]
-
         service = CosmosDBService.get_instance()
-        new_incident = service.add_item(incident, "Incidents")
+        new_incident = service.add_item(data, "Incidents")
         return jsonify(new_incident), 201
-    except ValueError as ve:
-        return jsonify({"error": str(ve)}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
