@@ -1,22 +1,22 @@
 resource_requirements = {
     'FIRE': {
         'LOW': {
-            'FireTruck': 1,
+            'Fire Truck': 1,
             'Firefighter': 3
         },
         'MEDIUM': {
-            'FireTruck': 2,
+            'Fire Truck': 2,
             'Ambulance': 1,
             'Firefighter': 5,
             'EMT': 2
         },
         'HIGH': {
-            'FireTruck': 3,
+            'Fire Truck': 3,
             'Ambulance': 2,
-            'WaterTanker': 1,
+            'Water Tanker': 1,
             'Firefighter': 8,
             'EMT': 4,
-            'CommandVehicle': 1
+            'Command Vehicle': 1
         }
     },
     'MEDICAL': {
@@ -33,19 +33,19 @@ resource_requirements = {
             'Ambulance': 3,
             'EMT': 6,
             'Paramedic': 2,
-            'MobileMedical': 1,
-            'CommandVehicle': 1
+            'Mobile Medical': 1,
+            'Command Vehicle': 1
         }
     },
     'INFRASTRUCTURE': {
         'LOW': {
-            'UtilityTruck': 1,
+            'Utility Truck': 1,
             'Technician': 2
         },
         'MEDIUM': {
-            'UtilityTruck': 2,
+            'Utility Truck': 2,
             'Technician': 4,
-            'HeavyEquipment': 1
+            'Heavy Equipment': 1
         },
         'HIGH': {
             'Utility Truck': 3,
@@ -65,7 +65,7 @@ resource_requirements = {
             'Rescue Vehicle': 2,
             'Boat': 1,
             'Rescue Personnel': 4,
-            'PumpUnit': 2
+            'Pump Unit': 2
         },
         'HIGH': {
             'Rescue Vehicle': 3,

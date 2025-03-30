@@ -15,12 +15,14 @@ def main():
     incident_factory = IncidentFactory()
     strategy_factory = StrategyFactory()
 
-    resource_allocator = ResourceAllocator(resource_client, incident_client, incident_factory, strategy_factory)
+    mqtt_handler = MQTTHandler(resource_allocator=None)
+    
+    resource_allocator = ResourceAllocator(resource_client, incident_client, incident_factory, strategy_factory, mqtt_handler)
+    
+    mqtt_handler.resource_allocator = resource_allocator
 
-    resource_allocator.allocate_new_incident({"type": "fire", "severity": "HIGH"})
-
-    mqtt_handler = MQTTHandler(resource_allocator)
     client = mqtt_handler.build_client()
+
     client.loop_forever()
 
 if __name__ == '__main__':

@@ -18,7 +18,16 @@ class ResourceClient:
             "incidentId": incident_id,
             "resourceIds": resources
         }
-        response = requests.post(url, json=payload, timeout=10)
+        response = requests.post(url, headers=self._headers(), json=payload, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    
+    def free_resources(self, incident_id):
+        url = f"{self.base_url}/resources/free"
+        payload = {
+            "incidentId": incident_id
+        }
+        response = requests.post(url, headers=self._headers(), json=payload, timeout=10)
         response.raise_for_status()
         return response.json()
 
@@ -28,3 +37,8 @@ class ResourceClient:
         response.raise_for_status()
         return response.json()
     
+    def get_unassigned_resources(self):
+        url = f"{self.base_url}/resources/notAssigned"
+        response = requests.get(url, headers=self._headers(), timeout=10)
+        response.raise_for_status()
+        return response.json()   

@@ -14,19 +14,19 @@ class IncidentClient:
 
     def create_incident(self, incident_data):
         url = f"{self.base_url}/incidents"
-        response = requests.post(url, json=incident_data, timeout=10)
+        response = requests.post(url, headers=self._headers(), json=incident_data, timeout=10)
         response.raise_for_status()
         return response
 
     def update_status(self, incident_id, status):
-        url = f"{self.base_url}/incidents/{incident_id}/status"
+        url = f"{self.base_url}/incidents/{incident_id}"
         payload = {"status": status}
-        response = requests.put(url, json=payload, timeout=10)
+        response = requests.put(url, headers=self._headers(), json=payload, timeout=10)
         response.raise_for_status()
         return response.json()
 
     def get_incident(self, incident_id):
         url = f"{self.base_url}/incidents/{incident_id}"
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, headers=self._headers(), timeout=10)
         response.raise_for_status()
         return response.json()
