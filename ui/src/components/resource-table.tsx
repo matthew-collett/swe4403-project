@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
 import { Resource } from '@/types/api'
 
 type Props = {
@@ -16,42 +15,47 @@ type Props = {
   resources: Resource[]
 }
 
-const ResourceTable = ({ title, resources }: Props) => (
-  <Card>
-    <CardHeader>
-      <CardTitle>{title} Resources</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[20%]">Name</TableHead>
-            <TableHead className="w-[20%]">In Use</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {resources.map(res => (
-            <TableRow key={res.id}>
-              <TableCell>{res.type}</TableCell>
-              <TableCell>
-                <Badge
-                  className={
-                    res.isAllocated === true
-                      ? 'bg-green-100 text-green-700 hover:bg-green-100'
-                      : res.isAllocated === false
-                        ? 'bg-orange-100 text-orange-700 hover:bg-orange-100'
-                        : 'bg-slate-200 text-slate-800 hover:bg-slate-800'
-                  }
-                >
-                  {res.isAllocated?.toString() ?? 'Unknown'}
-                </Badge>
-              </TableCell>
+const ResourceTable = ({ title, resources }: Props) => {
+  // Group by type
+  const groupedByType: Record<string, { total: number; inUse: number }> = {}
+
+  for (const res of resources) {
+    const key = res.type
+    if (!groupedByType[key]) {
+      groupedByType[key] = { total: 0, inUse: 0 }
+    }
+
+    groupedByType[key].total += 1
+    if (res.isAllocated) {
+      groupedByType[key].inUse += 1
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title} Resources</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[75%]">Type</TableHead>
+              <TableHead className="w-[25%] text-center">In Use</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </CardContent>
-  </Card>
-)
+          </TableHeader>
+          <TableBody>
+            {Object.entries(groupedByType).map(([type, stats]) => (
+              <TableRow key={type}>
+                <TableCell>{type}</TableCell>
+                <TableCell className="text-center">{`${stats.inUse}/${stats.total}`}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default ResourceTable
