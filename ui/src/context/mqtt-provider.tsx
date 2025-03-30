@@ -21,6 +21,8 @@ interface MqttContextType {
   createIncident: (incident: IncidentUpdate) => Promise<boolean>
   // eslint-disable-next-line no-unused-vars
   updateIncidentStatus: (incidentId: string, status: StatusType) => Promise<boolean>
+  // eslint-disable-next-line no-unused-vars
+  clearStillPending: (incidentId: string) => void
   incidents: Record<string, Incident>
   connectionStatus: ConnectionStatus
   refreshIncidents: () => Promise<void>
@@ -89,9 +91,24 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
       refreshIncidents()
     })
 
-    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-    mqttClient.on('message', async (_topic, _message) => {
+    mqttClient.on('message', async (_topic, message) => {
       await refreshIncidents()
+
+      const payload = JSON.parse(message.toString()) as IncidentUpdate
+      if (payload.status === StatusType.PENDING) {
+        setIncidents(prev => {
+          if (prev[payload.id]) {
+            return {
+              ...prev,
+              [payload.id]: {
+                ...prev[payload.id],
+                stillPending: true,
+              },
+            }
+          }
+          return prev
+        })
+      }
     })
 
     mqttClient.on('offline', () => {
@@ -149,15 +166,38 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
     [client, user, refreshIncidents],
   )
 
+  const clearStillPending = useCallback((incidentId: string) => {
+    setIncidents(prev => {
+      if (prev[incidentId]) {
+        return {
+          ...prev,
+          [incidentId]: {
+            ...prev[incidentId],
+            stillPending: undefined,
+          },
+        }
+      }
+      return prev
+    })
+  }, [])
+
   const contextValue = useMemo(
     () => ({
       createIncident,
       updateIncidentStatus,
       incidents,
       connectionStatus,
+      clearStillPending,
       refreshIncidents,
     }),
-    [createIncident, updateIncidentStatus, incidents, connectionStatus, refreshIncidents],
+    [
+      createIncident,
+      updateIncidentStatus,
+      incidents,
+      connectionStatus,
+      refreshIncidents,
+      clearStillPending,
+    ],
   )
 
   return <MqttContext.Provider value={contextValue}>{children}</MqttContext.Provider>

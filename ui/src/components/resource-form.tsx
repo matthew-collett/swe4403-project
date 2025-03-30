@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -13,9 +15,11 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { CategoryToTypesMap, Resource, ResourceCategory, ResourceType } from '@/types/api'
 import { auth } from '@/lib'
 import { api } from '@/lib/api'
+import { CategoryToTypesMap, Resource, ResourceCategory, ResourceType } from '@/types/api'
 
 type Props = {
   onCancel: () => void
+  // eslint-disable-next-line no-unused-vars
   onCreate: (resource: Resource) => void
 }
 
