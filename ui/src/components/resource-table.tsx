@@ -34,14 +34,14 @@ const ResourceTable = ({ title, resources }: Props) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title} Resources</CardTitle>
+        <CardTitle className="text-primary">{title} Resources</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[75%]">Type</TableHead>
-              <TableHead className="w-[25%] text-center">In Use</TableHead>
+              <TableHead className="w-[75%] text-secondary">Type</TableHead>
+              <TableHead className="w-[25%] text-center text-secondary">In Use</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

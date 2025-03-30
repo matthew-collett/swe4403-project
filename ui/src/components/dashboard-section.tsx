@@ -12,7 +12,7 @@ const DashboardSection = ({ title, titleRight, children }: DashboardSectionProps
   return (
     <Card className="flex-1 ">
       <CardHeader>
-        <CardTitle className="flex justify-between items-center w-full">
+        <CardTitle className="flex justify-between items-center w-full text-primary">
           <span className="text-lg">{title}</span>
           {titleRight && <span className="text-sm text-muted-foreground italic">{titleRight}</span>}
         </CardTitle>

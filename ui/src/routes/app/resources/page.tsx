@@ -43,11 +43,10 @@ const ResourcesPage = () => {
 
   return (
     <>
-      <PageTitle route={getAppRoute(location.pathname)} />
+      <PageTitle className="text-primary" route={getAppRoute(location.pathname)} />
 
       <div className="px-4 mt-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Current Resources</h2>
+        <div className="flex justify-end">
           <Button onClick={() => setShowForm(!showForm)}>
             {showForm ? 'Cancel' : 'Add Resource'}
           </Button>
