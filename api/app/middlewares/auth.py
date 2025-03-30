@@ -7,8 +7,10 @@ from firebase_admin.exceptions import FirebaseError
 def token_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        auth_header = request.headers.get('Authorization', '')
+        if request.method == 'OPTIONS':
+            return f(*args, **kwargs)
 
+        auth_header = request.headers.get('Authorization', '')
         if not auth_header.startswith('Bearer '):
             return jsonify({'message': 'Missing or invalid authentication token'}), 401
 

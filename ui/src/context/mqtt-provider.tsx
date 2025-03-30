@@ -1,5 +1,13 @@
 import mqtt, { MqttClient } from 'mqtt'
-import { createContext, useContext, ReactNode, useEffect, useState, useCallback } from 'react'
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react'
 
 import { useAuth } from '@/context/auth-provider'
 import { auth } from '@/lib'
@@ -10,11 +18,12 @@ type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
 
 interface MqttContextType {
   // eslint-disable-next-line no-unused-vars
-  createIncident: (incident: IncidentUpdate) => void
+  createIncident: (incident: IncidentUpdate) => Promise<boolean>
   // eslint-disable-next-line no-unused-vars
-  updateIncidentStatus: (incidentId: string, status: StatusType) => void
+  updateIncidentStatus: (incidentId: string, status: StatusType) => Promise<boolean>
   incidents: Record<string, Incident>
   connectionStatus: ConnectionStatus
+  refreshIncidents: () => Promise<void>
 }
 
 const MqttContext = createContext<MqttContextType | null>(null)
@@ -25,47 +34,33 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
   const [incidents, setIncidents] = useState<Record<string, Incident>>({})
   const { user } = useAuth()
 
-  const fetchIncident = useCallback(async (incidentId: string): Promise<Incident | null> => {
+  const refreshIncidents = useCallback(async () => {
+    if (!user) return
+
     const token = await auth.currentUser?.getIdToken()
-    try {
-      const { status, data } = await api.get(`/incidents/${incidentId}`, token)
-      return status === 200 ? (data as Incident) : null
-    } catch (error) {
-      console.error(`Failed to fetch incident ${incidentId}:`, error)
-      return null
+    const { status, data } = await api.get('/incidents', token)
+
+    if (status === 200) {
+      const incidentMap = (data as Incident[]).reduce(
+        (acc, incident) => {
+          acc[incident.id] = incident
+          return acc
+        },
+        {} as Record<string, Incident>,
+      )
+
+      setIncidents(incidentMap)
     }
-  }, [])
+  }, [user])
 
   useEffect(() => {
-    if (!user) {
-      return
-    }
+    if (!user) return
+    refreshIncidents()
+  }, [user, refreshIncidents])
 
-    // Initial fetch of all incidents
-    const loadInitialIncidents = async () => {
-      try {
-        const token = await auth.currentUser?.getIdToken()
-        const { status, data } = await api.get('/incidents', token)
+  useEffect(() => {
+    if (!user) return
 
-        if (status === 200) {
-          const incidentMap = (data as Incident[]).reduce(
-            (acc, incident) => {
-              acc[incident.id] = incident
-              return acc
-            },
-            {} as Record<string, Incident>,
-          )
-
-          setIncidents(incidentMap)
-        }
-      } catch (error) {
-        console.error('Failed to load initial incidents:', error)
-      }
-    }
-
-    loadInitialIncidents()
-
-    // Set up MQTT connection
     setConnectionStatus('connecting')
     const clientId = 'clientId-' + Math.random().toString(16).substring(2, 8)
     const host = import.meta.env.VITE_MQTT_HOST as string
@@ -88,34 +83,18 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
     const mqttClient = mqtt.connect(brokerUrl, options)
 
     mqttClient.on('connect', () => {
-      console.log('Connected to MQTT broker')
       setConnectionStatus('connected')
       mqttClient.subscribe('incidents/+/status', { qos })
+      mqttClient.subscribe('incidents/new', { qos })
+      refreshIncidents()
     })
 
-    mqttClient.on('message', async (topic, message) => {
-      try {
-        const payload = JSON.parse(message.toString()) as IncidentUpdate
-        console.log(`Received message on ${topic}: ${JSON.stringify(payload)}`)
-        const incident = await fetchIncident(payload.id)
-        if (incident) {
-          setIncidents(prev => ({
-            ...prev,
-            [payload.id]: incident,
-          }))
-        }
-      } catch (error) {
-        console.error('Error processing MQTT message:', error)
-      }
-    })
-
-    mqttClient.on('error', (err: Error) => {
-      console.error('MQTT connection error:', err)
-      setConnectionStatus('error')
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    mqttClient.on('message', async (_topic, _message) => {
+      await refreshIncidents()
     })
 
     mqttClient.on('offline', () => {
-      console.log('MQTT client offline')
       setConnectionStatus('disconnected')
     })
 
@@ -126,51 +105,60 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
       setClient(null)
       setConnectionStatus('disconnected')
     }
-  }, [user, fetchIncident])
+  }, [user, refreshIncidents])
 
   const createIncident = useCallback(
-    async (incident: IncidentUpdate) => {
-      if (!client || !user) return
+    async (incident: IncidentUpdate): Promise<boolean> => {
+      if (!client || !user) {
+        return false
+      }
 
-      // Publish to the incidents/new topic
-      client.publish('incidents/new', JSON.stringify(incident))
-
-      // Also publish to the status topic to ensure it triggers the message handler
-      client.publish(`incidents/${incident.id}/status`, JSON.stringify(incident))
-
-      // For immediate UI feedback, fetch the incident directly and add it to state
-      const newIncident = await fetchIncident(incident.id)
-      if (newIncident) {
-        setIncidents(prev => ({
-          ...prev,
-          [incident.id]: newIncident,
-        }))
+      try {
+        client.publish('incidents/new', JSON.stringify(incident))
+        await refreshIncidents()
+        return true
+      } catch (error) {
+        console.error('Error in createIncident:', error)
+        return false
       }
     },
-    [client, user, fetchIncident],
+    [client, user, refreshIncidents],
   )
 
   const updateIncidentStatus = useCallback(
-    (incidentId: string, status: StatusType) => {
-      if (!client || !user) return
-
-      const update: IncidentUpdate = {
-        id: incidentId,
-        status,
-        updatedAt: new Date().toISOString(),
+    async (incidentId: string, status: StatusType): Promise<boolean> => {
+      if (!client || !user) {
+        return false
       }
 
-      client.publish(`incidents/${incidentId}/status`, JSON.stringify(update))
+      try {
+        const update: IncidentUpdate = {
+          id: incidentId,
+          status,
+          updatedAt: new Date().toISOString(),
+        }
+
+        client.publish(`incidents/${incidentId}/status`, JSON.stringify(update))
+        await refreshIncidents()
+        return true
+      } catch (error) {
+        console.error('Error in updateIncidentStatus:', error)
+        return false
+      }
     },
-    [client, user],
+    [client, user, refreshIncidents],
   )
 
-  const contextValue: MqttContextType = {
-    createIncident,
-    updateIncidentStatus,
-    incidents,
-    connectionStatus,
-  }
+  const contextValue = useMemo(
+    () => ({
+      createIncident,
+      updateIncidentStatus,
+      incidents,
+      connectionStatus,
+      refreshIncidents,
+    }),
+    [createIncident, updateIncidentStatus, incidents, connectionStatus, refreshIncidents],
+  )
 
   return <MqttContext.Provider value={contextValue}>{children}</MqttContext.Provider>
 }

@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
+import { v4 as uuidv4 } from 'uuid'
+
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -11,10 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ResourceCategory, ResourceType, StatusType } from '@/types/api'
-import { v4 as uuidv4 } from 'uuid'
-import { auth } from '@/lib/firebase'
 import { api } from '@/lib/api'
+import { auth } from '@/lib/firebase'
+import { ResourceCategory, ResourceType, StatusType } from '@/types/api'
 
 const AddResourceForm = () => {
   const [formData, setFormData] = useState({
@@ -60,8 +61,7 @@ const AddResourceForm = () => {
         lastUpdatedAt: new Date().toISOString(),
       }
       const resourceString = JSON.stringify(newResource)
-      const response = await api.post('/resources', token, resourceString)
-      console.log('Resource created:', response)
+      await api.post('/resources', token, resourceString)
       // Reset form if needed
     } catch (error) {
       console.error('Error submitting resource:', error)

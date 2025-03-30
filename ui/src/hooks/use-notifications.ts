@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
+import { useEffect, useState, useCallback } from 'react'
 
 import { useAuth } from '@/context'
 import { useMqtt } from '@/context/mqtt-provider'
@@ -12,8 +11,7 @@ export const useNotifications = () => {
 
   const [readIds, setReadIds] = useState<string[]>(() => {
     if (typeof window === 'undefined' || !user) return []
-
-    const stored = localStorage.getItem(`notification-read-${user.uid}`)
+    const stored = localStorage.getItem(`notification-read-${user?.uid}`)
     return stored ? JSON.parse(stored) : []
   })
 
@@ -22,39 +20,49 @@ export const useNotifications = () => {
     localStorage.setItem(`notification-read-${user.uid}`, JSON.stringify(readIds))
   }, [readIds, user])
 
-  useEffect(() => {
+  const refreshNotifications = useCallback(() => {
     if (!user || connectionStatus !== 'connected') return
 
-    try {
-      const notificationsList = Object.values(incidents)
-        .map(incident => {
-          const notifId = `notification-${incident.id}`
+    const notificationsList = Object.values(incidents)
+      .map(incident => {
+        const notifId = `notification-${incident.id}`
+        return {
+          id: notifId,
+          uid: user.uid,
+          title: `Incident ${incident.status}`,
+          message: `${incident.type} at ${incident.address}`,
+          read: readIds.includes(notifId),
+          start_time: new Date(incident.lastUpdatedAt || incident.lastUpdatedAt).getTime(),
+          type: 'incident_update',
+        } as Notification
+      })
+      .sort((a, b) => b.start_time - a.start_time)
+      .slice(0, 10)
 
-          return {
-            id: notifId,
-            uid: user.uid,
-            title: `Incident ${incident.status}`,
-            message: `${incident.type} at ${incident.address}`,
-            read: readIds.includes(notifId),
-            start_time: new Date(incident.lastUpdatedAt).getTime(),
-            type: 'incident_update',
-          } as Notification
-        })
-        .sort((a, b) => b.start_time - a.start_time)
-        .slice(0, 10)
-
-      setNotifications(notificationsList)
-    } catch (error) {
-      toast.error('Failed to process notifications')
-      console.error(error)
-    }
+    setNotifications(notificationsList)
   }, [incidents, user, connectionStatus, readIds])
 
-  const markAsRead = (id: string) => {
-    if (!readIds.includes(id)) {
-      setReadIds(prev => [...prev, id])
-    }
-  }
+  useEffect(() => {
+    refreshNotifications()
+  }, [incidents, refreshNotifications])
 
-  return { notifications, markAsRead }
+  const markAsRead = useCallback(
+    (id: string) => {
+      if (!readIds.includes(id)) {
+        setReadIds(prev => [...prev, id])
+        setNotifications(prev =>
+          prev.map(notification =>
+            notification.id === id ? { ...notification, read: true } : notification,
+          ),
+        )
+      }
+    },
+    [readIds],
+  )
+
+  return {
+    notifications,
+    markAsRead,
+    refreshNotifications,
+  }
 }

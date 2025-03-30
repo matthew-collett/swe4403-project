@@ -1,6 +1,5 @@
 import { Bell } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
+import { useState, useEffect } from 'react'
 
 import { NotificationModal } from '@/components'
 import {
@@ -10,24 +9,29 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui'
+import { useMqtt } from '@/context'
 import { useNotifications } from '@/hooks'
 import { Notification } from '@/types'
 
 export const NotificationBell = () => {
-  const { notifications, markAsRead } = useNotifications()
+  const { notifications, markAsRead, refreshNotifications } = useNotifications()
+  const { connectionStatus } = useMqtt()
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
+
+  useEffect(() => {
+    if (connectionStatus === 'connected') {
+      refreshNotifications()
+    }
+  }, [connectionStatus, refreshNotifications])
 
   const handleNotificationClick = (notification: Notification) => {
     setSelectedNotification(notification)
-    try {
-      if (!notification.read) {
-        markAsRead(notification.id)
-      }
-    } catch (error) {
-      toast.error('error loading notifications')
-      console.error(error)
+    if (!notification.read) {
+      markAsRead(notification.id)
     }
   }
+
+  const unreadCount = notifications.filter(n => !n.read).length
 
   return (
     <>
@@ -35,9 +39,9 @@ export const NotificationBell = () => {
         <DropdownMenuTrigger asChild>
           <Button variant="link" size="icon" className="relative text-primary">
             <Bell className="h-[1.2rem] w-[1.2rem]" />
-            {notifications.some(n => !n.read) && (
+            {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">
-                {notifications.filter(n => !n.read).length}
+                {unreadCount}
               </span>
             )}
             <span className="sr-only">Notifications</span>
