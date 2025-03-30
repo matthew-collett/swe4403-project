@@ -1,9 +1,11 @@
+import strategies.resource_requirements as resource_requirements
 from strategies.allocation_strategy import AllocationStrategy
-from strategies.resource_requirements import resource_requirements
-from strategies.utils import check_and_allocation
 
 class FireStrategy(AllocationStrategy):
-    def allocate(self, incident, inventory):
-        severity = incident['severity'].upper()
-        required = resource_requirements['FIRE'].get(severity, {})
-        return check_and_allocation(required, inventory)
+    def __init__(self):
+        self.fire_resources = resource_requirements['FIRE']
+
+    def allocate(self, resources, severity):
+        required = self.fire_resources.get(severity, {})
+        self.check_resource_availability(required, resources)
+        return self.allocate_resources()

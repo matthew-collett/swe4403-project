@@ -1,8 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.services.database_singleton import CosmosDBService
 from app.middlewares.auth import token_required
-from app.factories.incident_factory import IncidentFactory
-from app.services.resource_allocator import ResourceAllocator
+from app.patterns.incident_factory import IncidentFactory
 
 incidents_bp = Blueprint("incidents", __name__)
 

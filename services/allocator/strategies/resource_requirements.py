@@ -48,51 +48,51 @@ resource_requirements = {
             'HeavyEquipment': 1
         },
         'HIGH': {
-            'UtilityTruck': 3,
+            'Utility Truck': 3,
             'Technician': 6,
-            'HeavyEquipment': 2,
+            'Heavy Equipment': 2,
             'Engineer': 1,
-            'CommandVehicle': 1
+            'Command Vehicle': 1
         }
     },
     'NATURAL_DISASTER': {
         'LOW': {
-            'RescueVehicle': 1,
-            'RescuePersonnel': 2,
+            'Rescue Vehicle': 1,
+            'Rescue  Personnel': 2,
             'PumpUnit': 1
         },
         'MEDIUM': {
-            'RescueVehicle': 2,
+            'Rescue Vehicle': 2,
             'Boat': 1,
-            'RescuePersonnel': 4,
+            'Rescue Personnel': 4,
             'PumpUnit': 2
         },
         'HIGH': {
-            'RescueVehicle': 3,
+            'Rescue Vehicle': 3,
             'Boat': 2,
-            'RescuePersonnel': 6,
-            'PumpUnit': 3,
-            'CommandVehicle': 1
+            'Rescue Personnel': 6,
+            'Pump Unit': 3,
+            'Command Vehicle': 1
         }
     },
     'HAZMAT': {
         'LOW': {
-            'HazmatVehicle': 1,
-            'HazmatTech': 2
+            'Hazmat Vehicle': 1,
+            'Hazmat Tech': 2
         },
         'MEDIUM': {
-            'HazmatVehicle': 1,
-            'FireTruck': 1,
-            'HazmatTech': 4,
+            'Hazmat Vehicle': 1,
+            'Fire Truck': 1,
+            'Hazmat Tech': 4,
             'Firefighter': 2
         },
         'HIGH': {
-            'HazmatVehicle': 2,
-            'FireTruck': 2,
-            'HazmatTech': 6,
+            'Hazmat Vehicle': 2,
+            'Fire Truck': 2,
+            'Hazmat Tech': 6,
             'Firefighter': 4,
-            'DeconUnit': 1,
-            'CommandVehicle': 1
+            'Decon Unit': 1,
+            'Command Vehicle': 1
         }
     }
 }

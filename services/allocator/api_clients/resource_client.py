@@ -27,3 +27,4 @@ class ResourceClient:
         response = requests.get(url, headers=self._headers(), timeout=10)
         response.raise_for_status()
         return response.json()
+    

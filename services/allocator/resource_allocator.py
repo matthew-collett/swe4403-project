@@ -1,37 +1,33 @@
 import os
 import requests
-from factories.strategy_factory import StrategyFactory
-from factories.incident_factory import IncidentFactory
 
-ALLOCATION_ENDPOINT = os.getenv("ALLOCATION_ENDPOINT")
-
-def allocate_resources(incident_data):
-    try:
-        print("Allocating resources for incident:", incident_data)
-        response = requests.post(ALLOCATION_ENDPOINT, json=incident_data, timeout=10)
-        if response.status_code == 200:
-            print("Allocation successful:", response.json())
-        else:
-            print(f"Allocation failed: {response.status_code} {response.text}")
-    except Exception as e:
-        print(f"Error during allocation: {e}")
- 
-def allocate_new_incident(incident_data):
-    incident = IncidentFactory.create_incident(incident_data)
-
-    incident_type = incident_data['type'].upper()
-    strategy = StrategyFactory.create_strategy(incident_type)
-
-    if not strategy:
-        print(f"No strategy found for {incident_type}, skipping.")
-        return
-
-    allocated = strategy.allocate(incident_data)
-
-    # send message to frontend
+base_url = os.getenv("API_BASE_URL")
+class ResourceAllocator:
+    def __init__(self, resource_client, incident_client, incident_factory, strategy_factory):
+        self.resource_client = resource_client
+        self.incident_client = incident_client
+        self.incident_factory = incident_factory
+        self.strategy_factory = strategy_factory
     
-    
-def allocate_status_update(status_data):
+    def allocate_new_incident(self, incident_data):
+        incident = self.incident_factory.create_incident(incident_data)
 
-    print("Handling status update:", status_data)
+        incident_type = incident.type.upper()
+        strategy = self.strategy_factory.create_strategy(incident_type)
+
+        if not strategy:
+            print(f"No strategy found for {incident_type}, skipping.")
+            return
+        
+        resources = self.resource_client.get_resources()
+
+        allocated = strategy.allocate(incident, resources)
+
+        # self.incident_client.create_incident(incident)
+
+        # send message to frontend
+        
+        
+    def allocate_status_update(self, status_data):
+        print("Handling status update:", status_data)
 
