@@ -10,9 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { CategoryToTypesMap, Resource, ResourceCategory, ResourceType } from '@/types/api'
 import { auth } from '@/lib'
 import { api } from '@/lib/api'
-import { CategoryToTypesMap, Resource, ResourceCategory, ResourceType } from '@/types/api'
 
 type Props = {
   onCancel: () => void

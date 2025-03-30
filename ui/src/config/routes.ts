@@ -44,14 +44,15 @@ const protectedRoutes: AppRoute[] = [
     title: 'Dashboard',
     path: 'dashboard',
     icon: LayoutDashboard,
-    description: 'Idk Yet',
+    description: 'Manage and monitor incidents with real-time updates and notifications',
     component: () => import('@/routes/app/dashboard'),
   },
   {
     title: 'Resources',
     path: 'resources',
     icon: Hammer,
-    description: 'Idk yet',
+    description:
+      'Manage and monitor categorized resources with real-time availability and usage statistics',
     component: () => import('@/routes/app/resources'),
   },
 ]
