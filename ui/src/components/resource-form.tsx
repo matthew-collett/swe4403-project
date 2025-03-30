@@ -1,11 +1,6 @@
 import { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -13,134 +8,94 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { CategoryToTypesMap, Resource, ResourceCategory, ResourceType } from '@/types/api'
+import { auth } from '@/lib'
 import { api } from '@/lib/api'
-import { auth } from '@/lib/firebase'
-import { ResourceCategory, ResourceType, StatusType } from '@/types/api'
 
-const AddResourceForm = () => {
-  const [formData, setFormData] = useState({
-    type: '',
-    category: '',
-    status: '',
-    averageSpeed: '',
-    currentAddress: '',
-    isAssigned: false,
-    incidentId: '',
-  })
+type Props = {
+  onCancel: () => void
+  onCreate: (resource: Resource) => void
+}
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+const ResourceForm = ({ onCancel, onCreate }: Props) => {
+  const [category, setCategory] = useState<ResourceCategory | undefined>()
+  const [type, setType] = useState<ResourceType | undefined>()
 
-  const handleCheckboxChange = () => {
-    setFormData(prev => ({ ...prev, isAssigned: !prev.isAssigned }))
-  }
+  const handleCreate = async () => {
+    if (!category || !type) return
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
     try {
       const token = await auth.currentUser?.getIdToken()
 
-      const newResource = {
+      const newResource: Resource = {
         id: uuidv4(),
-        type: formData.type,
-        category: formData.category,
-        status: formData.status,
-        averageSpeed: parseInt(formData.averageSpeed, 10),
-        currentLocation: {
-          address: formData.currentAddress,
-          coordinates: {
-            latitude: 0,
-            longitude: 0,
-          },
-        },
-        isAssigned: formData.isAssigned,
-        incidentId: formData.isAssigned ? formData.incidentId : null,
-        capabilities: [],
-        lastUpdatedAt: new Date().toISOString(),
+        category,
+        type,
+        isAllocated: false,
       }
-      const resourceString = JSON.stringify(newResource)
-      await api.post('/resources', token, resourceString)
-      // Reset form if needed
+
+      const response = await api.post('/resources', token, newResource)
+
+      if (response.status === 201) {
+        onCreate(response.data as Resource)
+      }
     } catch (error) {
-      console.error('Error submitting resource:', error)
+      console.error('Failed to create resource:', error)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Add New Resource</CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label>Type</Label>
-            <Select
-              value={formData.type}
-              onValueChange={value => setFormData(prev => ({ ...prev, type: value }))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(ResourceType).map(value => (
-                  <SelectItem key={value} value={value}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Add New Resource</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Select
+          value={category}
+          onValueChange={val => {
+            setCategory(val as ResourceCategory)
+            setType(undefined)
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Category" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.values(ResourceCategory).map(cat => (
+              <SelectItem key={cat} value={cat}>
+                {cat}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-          <div>
-            <Label>Category</Label>
-            <Select
-              value={formData.category}
-              onValueChange={value => setFormData(prev => ({ ...prev, category: value }))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(ResourceCategory).map(value => (
-                  <SelectItem key={value} value={value}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        {category && (
+          <Select value={type} onValueChange={val => setType(val as ResourceType)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Resource Type" />
+            </SelectTrigger>
+            <SelectContent>
+              {CategoryToTypesMap[category].map(t => (
+                <SelectItem key={t} value={t}>
+                  {t}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
-          <div>
-            <Label>Address</Label>
-            <Input name="currentAddress" value={formData.currentAddress} onChange={handleChange} />
-          </div>
-
-          <div className="flex items-center gap-2 mt-6">
-            <Checkbox
-              id="isAssigned"
-              checked={formData.isAssigned}
-              onCheckedChange={handleCheckboxChange}
-            />
-            <Label htmlFor="isAssigned">Assigned to Incident?</Label>
-          </div>
-
-          {formData.isAssigned && (
-            <div className="md:col-span-2">
-              <Label>Incident ID</Label>
-              <Input name="incidentId" value={formData.incidentId} onChange={handleChange} />
-            </div>
-          )}
-
-          <div className="md:col-span-2">
-            <Button type="submit">Submit</Button>
-          </div>
-        </CardContent>
-      </Card>
-    </form>
+        <div className="flex gap-2">
+          <Button onClick={handleCreate}>Create Resource</Button>
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
-export default AddResourceForm
+export default ResourceForm
