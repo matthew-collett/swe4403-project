@@ -40,6 +40,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       const isGoogle = user.providerData.some(provider => provider.providerId === 'google.com')
       setIsGoogleSignIn(isGoogle)
+      const token = await user.getIdToken()
+      console.log(token)
 
       setUser(user)
       setLoading(false)
