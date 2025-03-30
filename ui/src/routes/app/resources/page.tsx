@@ -75,25 +75,15 @@ const ResourcesPage = () => {
                 <TableCell>
                   <Badge
                     className={
-                      res.status === 'Available'
+                      res.isAllocated === true
                         ? 'bg-green-100 text-green-700 hover:bg-green-100'
-                        : res.status === 'En Route'
+                        : res.isAllocated === false
                           ? 'bg-orange-100 text-orange-700 hover:bg-orange-100'
                           : 'bg-slate-200 text-slate-800 hover:bg-slate-800'
                     }
                   >
-                    {res.status}
+                    {res.isAllocated}
                   </Badge>
-                </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
-                  {res.currentLocation?.address}
-                </TableCell>
-                <TableCell>
-                  {res.isAssigned ? (
-                    <span className="text-sm text-blue-700">{res.incidentId}</span>
-                  ) : (
-                    <span className="text-sm italic text-gray-400">Unassigned</span>
-                  )}
                 </TableCell>
               </TableRow>
             ))}

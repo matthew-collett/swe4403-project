@@ -14,6 +14,7 @@ export type Resource = {
   id: string
   type: ResourceType
   category: ResourceCategory
+  isAllocated: boolean
 }
 
 export type IncidentUpdate = {
