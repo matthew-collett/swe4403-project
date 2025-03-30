@@ -15,7 +15,17 @@ def get_resources():
         return jsonify(resources)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+    
+@resources_bp.route("/notAssigned", methods=["GET"])
+@token_required
+def get_unassigned_resources():
+    try:
+        service = CosmosDBService.get_instance()
+        query = "SELECT * FROM c WHERE c.isAssigned = false"
+        resources = service.query_items(query, "Resources")
+        return jsonify(resources)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @resources_bp.route("", methods=["POST"])
 @token_required
