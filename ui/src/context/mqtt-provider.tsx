@@ -18,7 +18,7 @@ type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error'
 
 interface MqttContextType {
   // eslint-disable-next-line no-unused-vars
-  createIncident: (incident: IncidentUpdate) => Promise<boolean>
+  createIncident: (incident: IncidentUpdate) => Promise<void>
   // eslint-disable-next-line no-unused-vars
   updateIncidentStatus: (incidentId: string, status: StatusType) => Promise<boolean>
   // eslint-disable-next-line no-unused-vars
@@ -91,11 +91,11 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
       refreshIncidents()
     })
 
-    mqttClient.on('message', async (_topic, message) => {
+    mqttClient.on('message', async (topic, message) => {
       await refreshIncidents()
 
       const payload = JSON.parse(message.toString()) as IncidentUpdate
-      if (payload.status === StatusType.PENDING) {
+      if (topic.includes('status') && payload.status === StatusType.PENDING) {
         setIncidents(prev => {
           if (prev[payload.id]) {
             return {
@@ -125,19 +125,13 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
   }, [user, refreshIncidents])
 
   const createIncident = useCallback(
-    async (incident: IncidentUpdate): Promise<boolean> => {
+    async (incident: IncidentUpdate): Promise<void> => {
       if (!client || !user) {
-        return false
+        return
       }
 
-      try {
-        client.publish('incidents/new', JSON.stringify(incident))
-        await refreshIncidents()
-        return true
-      } catch (error) {
-        console.error('Error in createIncident:', error)
-        return false
-      }
+      client.publish('incidents/new', JSON.stringify(incident))
+      await refreshIncidents()
     },
     [client, user, refreshIncidents],
   )

@@ -22,10 +22,10 @@ def get_incidents():
 def get_incident_by_id(id):
     try:
         service = CosmosDBService.get_instance()
-        incidents = service.read_item(id, "id", "Incidents")
-        if not incidents:
+        incident = service.read_item(id, id, "Incidents")
+        if not incident:
             return jsonify({"message": "Incident not found"}), 404
-        return jsonify(incidents)
+        return jsonify(incident)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -50,6 +50,7 @@ def get_incidents_by_status():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @incidents_bp.route("<string:id>", methods=["PUT"])
 @token_required
 def update_incident(id):
@@ -70,6 +71,7 @@ def delete_incident(id):
         return jsonify({"message": "Incident deleted"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 @incidents_bp.route("", methods=["POST"])
 @token_required
