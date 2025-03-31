@@ -91,21 +91,15 @@ class CosmosDBService:
         added_item = container.create_item(body=item)
         return added_item
 
+
     @classmethod
-    def update_item(cls, item_id, partial_updates, container_id):
+    def update_item(cls, item_id, updated_item, container_id):
         if container_id not in cls.containers:
             raise Exception(
                 f"Container {container_id} does not exist or has not been initialized.")
-
         container = cls.containers[container_id]
-
-        existing_item = container.read_item(
-            item=item_id, partition_key=item_id)
-
-        for key, value in partial_updates.items():
-            existing_item[key] = value
-
-        updated_item = container.replace_item(item=item_id, body=existing_item)
+        # Simply replace the item with the updated version
+        updated_item = container.replace_item(item=item_id, body=updated_item)
         return updated_item
 
     @classmethod

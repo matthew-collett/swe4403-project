@@ -21,8 +21,6 @@ interface MqttContextType {
   createIncident: (incident: IncidentUpdate) => Promise<void>
   // eslint-disable-next-line no-unused-vars
   updateIncidentStatus: (incidentId: string, status: StatusType) => Promise<boolean>
-  // eslint-disable-next-line no-unused-vars
-  clearStillPending: (incidentId: string) => void
   incidents: Record<string, Incident>
   connectionStatus: ConnectionStatus
   refreshIncidents: () => Promise<void>
@@ -86,29 +84,14 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
 
     mqttClient.on('connect', () => {
       setConnectionStatus('connected')
-      mqttClient.subscribe('incidents/+/status', { qos })
+      mqttClient.subscribe('incidents/ui/+/status', { qos })
       mqttClient.subscribe('incidents/new', { qos })
       refreshIncidents()
     })
 
-    mqttClient.on('message', async (topic, message) => {
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    mqttClient.on('message', async (_topic, _message) => {
       await refreshIncidents()
-
-      const payload = JSON.parse(message.toString()) as IncidentUpdate
-      if (topic.includes('status') && payload.status === StatusType.PENDING) {
-        setIncidents(prev => {
-          if (prev[payload.id]) {
-            return {
-              ...prev,
-              [payload.id]: {
-                ...prev[payload.id],
-                stillPending: true,
-              },
-            }
-          }
-          return prev
-        })
-      }
     })
 
     mqttClient.on('offline', () => {
@@ -149,7 +132,7 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
           updatedAt: new Date().toISOString(),
         }
 
-        client.publish(`incidents/${incidentId}/status`, JSON.stringify(update))
+        client.publish(`incidents/allocator/${incidentId}/status`, JSON.stringify(update))
         await refreshIncidents()
         return true
       } catch (error) {
@@ -160,38 +143,15 @@ export const MqttProvider = ({ children }: { children: ReactNode }) => {
     [client, user, refreshIncidents],
   )
 
-  const clearStillPending = useCallback((incidentId: string) => {
-    setIncidents(prev => {
-      if (prev[incidentId]) {
-        return {
-          ...prev,
-          [incidentId]: {
-            ...prev[incidentId],
-            stillPending: undefined,
-          },
-        }
-      }
-      return prev
-    })
-  }, [])
-
   const contextValue = useMemo(
     () => ({
       createIncident,
       updateIncidentStatus,
       incidents,
       connectionStatus,
-      clearStillPending,
       refreshIncidents,
     }),
-    [
-      createIncident,
-      updateIncidentStatus,
-      incidents,
-      connectionStatus,
-      refreshIncidents,
-      clearStillPending,
-    ],
+    [createIncident, updateIncidentStatus, incidents, connectionStatus, refreshIncidents],
   )
 
   return <MqttContext.Provider value={contextValue}>{children}</MqttContext.Provider>

@@ -80,6 +80,7 @@ const IncidentForm = ({ onSuccess }: IncidentFormProps) => {
       description: formData.description,
       reportedAt: new Date().toISOString(),
       lastUpdatedAt: new Date().toISOString(),
+      stillPending: false,
     }
 
     const incidentJson = JSON.stringify(incident)

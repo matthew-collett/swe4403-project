@@ -8,7 +8,7 @@ export type Incident = {
   description: string
   reportedAt: Date
   lastUpdatedAt: Date
-  stillPending?: boolean
+  stillPending: boolean
 }
 
 export type Resource = {

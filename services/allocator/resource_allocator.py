@@ -2,55 +2,73 @@ import datetime
 import os
 
 base_url = os.getenv("API_BASE_URL")
+
+
 class ResourceAllocator:
-    def __init__(self, resource_client, incident_client, incident_factory, strategy_factory, mqtt_handler):
+    def __init__(self, resource_client, incident_client, incident_factory, strategy_factory, publish_message_fn):
         self.resource_client = resource_client
         self.incident_client = incident_client
         self.incident_factory = incident_factory
         self.strategy_factory = strategy_factory
-        self.mqtt_handler = mqtt_handler
-    
+        self.publish_message = publish_message_fn
+
     def allocate_new_incident(self, incident_id):
-        incident_data = self.incident_client.get_incident(incident_id)
-        print(incident_data)
-        incident = self.incident_factory.create_incident(incident_data)
+        try:
+            incident_data = self.incident_client.get_incident(incident_id)
+            print(f"Processing incident data: {incident_data}")
+            incident = self.incident_factory.create_incident(incident_data)
 
-        incident_type = incident.type.upper()
-        strategy = self.strategy_factory.create_strategy(incident_type)
+            incident_type = incident.type.upper()
+            strategy_class = self.strategy_factory.create_strategy(
+                incident_type)
 
-        if not strategy:
-            print(f"No strategy found for {incident_type}, skipping.")
+            if not strategy_class:
+                print(f"No strategy found for {incident_type}, skipping.")
+                return
+
+            # Instantiate the strategy
+            strategy = strategy_class()
+
+            resources = self.resource_client.get_unassigned_resources()
+            print(f"Available resources: {len(resources)}")
+
+            # Get the resource IDs to allocate
+            resource_ids = strategy.allocate(resources, incident.severity)
+
+            if not resource_ids:
+                print(
+                    f"Resource allocation API call failed for incident {incident.id}")
+                self.incident_client.update_stillpending(incident_id, True)
+                return self.publish_message(
+                    topic=f"incidents/ui/{incident.id}/status",
+                    payload={
+                        "id": incident.id,
+                        "status": "Pending",
+                        "updated_at": datetime.datetime.utcnow().isoformat() + "Z"
+                    }
+                )
+
+            self.resource_client.allocate_resources(
+                incident.id, resource_ids)
+            self.allocate_status_update(incident.id, "Active")
+        except Exception as e:
+            print(f"Error in allocate_new_incident: {e}")
             return
-        
-        resources = self.resource_client.get_unassigned_resources()
 
-        allocated = strategy.allocate(resources, incident.severity, self.resource_client)
-
-        if not allocated:
-            print(f"Failed to allocate resources for incident {incident.id}")
-            return self.mqtt_handler.publish_message(
-                topic=f"incidents/{incident.id}/status",
-                payload={
-                    "id": incident.id,
-                    "status": "PENDING",
-                    "updated_at": datetime.utcnow().isoformat() + "Z"
-                },
-            )
-        
-        self.allocate_status_update(incident.id, "ACTIVE")
-        
     def allocate_status_update(self, incident_id, status):
-        if status == "RESOLVED":
-            self.resource_client.free_resources(incident_id)
-        else:
+        try:
+            if status == "Resolved":
+                self.resource_client.free_resources(incident_id)
+
             self.incident_client.update_status(incident_id, status)
-
-        return self.mqtt_handler.publish_message(
-            topic=f"incidents/{incident_id}/status",
-            payload={
-                "id": incident_id,
-                "status": status,
-                "updated_at": datetime.utcnow().isoformat() + "Z"
-            }
-        )
-
+            return self.publish_message(
+                topic=f"incidents/ui/{incident_id}/status",
+                payload={
+                    "id": incident_id,
+                    "status": status,
+                    "updated_at": datetime.datetime.utcnow().isoformat() + "Z"
+                }
+            )
+        except Exception as e:
+            print(f"Error in allocate_status_update: {e}")
+            return

@@ -43,37 +43,82 @@ def create_resource():
 @resources_bp.route("/allocate", methods=["PUT"])
 @token_required
 def allocate_resources():
-    try:
-        data = request.json
-        resource_ids = data.get("resource_ids")
-        incident_id = data.get("incident_id")
+    data = request.json
+    resource_ids = data.get("resource_ids")
+    incident_id = data.get("incident_id")
 
-        service = CosmosDBService.get_instance()
+    if not resource_ids or not incident_id:
+        return jsonify({"error": "Missing required parameters"}), 400
 
-        for resource_id in resource_ids:
+    service = CosmosDBService.get_instance()
+    successful_updates = []
+    failed_updates = []
+
+    for resource_id in resource_ids:
+        try:
             resource = service.read_item(resource_id, resource_id, "Resources")
-
             resource["isAllocated"] = True
             resource["incidentId"] = incident_id
-
             service.update_item(resource_id, resource, "Resources")
+            successful_updates.append(resource_id)
+        except Exception as e:
+            print(f"Error updating resource {resource_id}: {str(e)}")
+            failed_updates.append({"id": resource_id, "error": str(e)})
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    if failed_updates:
+        return jsonify({
+            "partial_success": True,
+            "successful_updates": successful_updates,
+            "failed_updates": failed_updates
+        }), 207  # 207 Multi-Status
+
+    return jsonify({"success": True, "updated_resources": successful_updates})
 
 
 @resources_bp.route("/free", methods=["PUT"])
 @token_required
 def free_resources():
+    data = request.json
+    incident_id = data.get("incident_id")
+
+    if not incident_id:
+        return jsonify({"error": "Missing incident_id parameter"}), 400
+
+    service = CosmosDBService.get_instance()
+
     try:
-        data = request.json
-        incident_id = data.get("incident_id")
-
-        service = CosmosDBService.get_instance()
         resources = service.list_items("incidentId", incident_id, "Resources")
-        for resource in resources:
-            resource["isAllocated"] = False
-            service.update_item(resource["id"], resource, "Resources")
+        print(resources)
 
+        if not resources:
+            return jsonify({"message": "No resources found for this incident"}), 200
+
+        successful_updates = []
+        failed_updates = []
+
+        for resource in resources:
+            try:
+                resource["isAllocated"] = False
+                resource["incidentId"] = None
+                service.update_item(resource["id"], resource, "Resources")
+                successful_updates.append(resource["id"])
+            except Exception as e:
+                print(f"Error freeing resource {resource['id']}: {str(e)}")
+                failed_updates.append({"id": resource["id"], "error": str(e)})
+
+        if failed_updates:
+            return jsonify({
+                "partial_success": True,
+                "message": f"Successfully freed {len(successful_updates)} resources, {len(failed_updates)} failed",
+                "successful_updates": successful_updates,
+                "failed_updates": failed_updates
+            }), 207  # 207 Multi-Status
+
+        return jsonify({
+            "success": True,
+            "message": f"Successfully freed {len(successful_updates)} resources",
+            "freed_resources": successful_updates
+        })
     except Exception as e:
+        print(f"Error in free_resources: {str(e)}")
         return jsonify({"error": str(e)}), 500

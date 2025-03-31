@@ -30,7 +30,7 @@ def get_incident_by_id(id):
         return jsonify({"error": str(e)}), 500
 
 
-@incidents_bp.route("/status", methods=["GET"])
+@incidents_bp.route("status", methods=["GET"])
 @token_required
 def get_incidents_by_status():
     try:
@@ -55,10 +55,27 @@ def get_incidents_by_status():
 @token_required
 def update_incident(id):
     try:
+        # Get the update data from the request
+        update_data = request.json
+
+        if not update_data:
+            return jsonify({"error": "No update data provided"}), 400
+
         service = CosmosDBService.get_instance()
-        updated_incident = service.update_item(id, request.json, "Incidents")
+
+        # Get the current incident
+        incident = service.read_item(id, id, "Incidents")
+
+        # Apply the updates from request.json to the incident
+        for key, value in update_data.items():
+            incident[key] = value
+
+        # Update the incident in the database
+        updated_incident = service.update_item(id, incident, "Incidents")
+
         return jsonify(updated_incident)
     except Exception as e:
+        print(f"Error updating incident {id}: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 

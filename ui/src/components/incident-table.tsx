@@ -24,7 +24,7 @@ interface IncidentTableProps {
 }
 
 const IncidentTable = ({ incidents, expandedRowId, toggleExpandedRow }: IncidentTableProps) => {
-  const { updateIncidentStatus, createIncident, clearStillPending } = useMqtt()
+  const { updateIncidentStatus, createIncident } = useMqtt()
 
   const handleResolveIncident = async (e: MouseEvent, incidentId: string) => {
     e.stopPropagation()
@@ -33,8 +33,6 @@ const IncidentTable = ({ incidents, expandedRowId, toggleExpandedRow }: Incident
 
   const handleTryAgain = async (e: MouseEvent, incidentId: string) => {
     e.stopPropagation()
-
-    clearStillPending(incidentId)
 
     await createIncident({
       id: incidentId,

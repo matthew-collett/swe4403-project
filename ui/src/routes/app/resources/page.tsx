@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom'
 import { PageTitle } from '@/components'
 import ResourceForm from '@/components/resource-form'
 import ResourceTable from '@/components/resource-table'
-
 import { Button } from '@/components/ui/button'
 import { getAppRoute } from '@/config'
 import { auth } from '@/lib'
