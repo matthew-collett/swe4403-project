@@ -5,6 +5,7 @@ import IncidentExpandedRow from './incident-expanded-row'
 import { IncidentBadge } from '@/components/incident-badge'
 import { SeverityBadge } from '@/components/severity-badge'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -19,7 +20,6 @@ import { Incident, StatusType } from '@/types'
 interface IncidentTableProps {
   incidents: Incident[]
   expandedRowId: string | null
-  // eslint-disable-next-line no-unused-vars
   toggleExpandedRow: (id: string) => void
 }
 
@@ -45,11 +45,12 @@ const IncidentTable = ({ incidents, expandedRowId, toggleExpandedRow }: Incident
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[40%]">Incident</TableHead>
-          <TableHead className="w-[10%]">Type</TableHead>
-          <TableHead className="w-[10%]">Severity</TableHead>
-          <TableHead className="w-[25%]">Location</TableHead>
-          <TableHead className="w-[15%]">Actions</TableHead>
+          <TableHead className="w-[10%] text-secondary">Severity</TableHead>
+
+          <TableHead className="w-[40%] text-secondary">Description</TableHead>
+          <TableHead className="w-[15%] text-secondary">Incident Type</TableHead>
+          <TableHead className="w-[20%] text-secondary">Location</TableHead>
+          <TableHead className="w-[15%] text-secondary text-center">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -59,17 +60,18 @@ const IncidentTable = ({ incidents, expandedRowId, toggleExpandedRow }: Incident
               onClick={() => toggleExpandedRow(incident.id)}
               className="cursor-pointer hover:bg-muted/50 transition"
             >
-              <TableCell className="font-medium">{incident.description.split('.')[0]}.</TableCell>
-              <TableCell>
-                <IncidentBadge type={incident.type} />
-              </TableCell>
               <TableCell>
                 <SeverityBadge severity={incident.severity} />
               </TableCell>
+              <TableCell className="font-medium">{incident.description.split('.')[0]}.</TableCell>
+              <TableCell>
+                <b>{incident.type}</b>
+              </TableCell>
+
               <TableCell className="text-muted-foreground text-sm truncate max-w-[200px]">
                 {incident.address}
               </TableCell>
-              <TableCell>
+              <TableCell className="text-center">
                 {incident.status === StatusType.ACTIVE && (
                   <Button
                     size="sm"

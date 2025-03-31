@@ -50,7 +50,7 @@ const DashboardPage = () => {
 
   return (
     <>
-      <PageTitle route={getAppRoute(location.pathname)} />
+      <PageTitle className="text-primary" route={getAppRoute(location.pathname)} />
       <div className="space-y-5">
         <div className="flex justify-end">
           <Button onClick={() => setShowForm(!showForm)}>

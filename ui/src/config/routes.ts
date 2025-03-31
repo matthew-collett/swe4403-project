@@ -1,4 +1,4 @@
-import { LucideIcon, LayoutDashboard, Hammer } from 'lucide-react'
+import { LucideIcon, LayoutDashboard, Hammer, InfoIcon } from 'lucide-react'
 import { Location, RouteObject } from 'react-router-dom'
 
 interface Route {
@@ -54,6 +54,13 @@ const protectedRoutes: AppRoute[] = [
     description:
       'Manage and monitor categorized resources with real-time availability and usage statistics',
     component: () => import('@/routes/app/resources'),
+  },
+  {
+    title: 'About Us',
+    path: 'about-us',
+    icon: InfoIcon,
+    description: 'Learn more about Unity Response and what we stand for',
+    component: () => import('@/routes/app/about-us'),
   },
 ]
 
