@@ -1,11 +1,9 @@
-import { Fragment, MouseEvent } from 'react'
+import { Fragment, MouseEvent, useState } from 'react'
 
 import IncidentExpandedRow from './incident-expanded-row'
 
-import { IncidentBadge } from '@/components/incident-badge'
 import { SeverityBadge } from '@/components/severity-badge'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -20,25 +18,37 @@ import { Incident, StatusType } from '@/types'
 interface IncidentTableProps {
   incidents: Incident[]
   expandedRowId: string | null
+  // eslint-disable-next-line no-unused-vars
   toggleExpandedRow: (id: string) => void
 }
 
 const IncidentTable = ({ incidents, expandedRowId, toggleExpandedRow }: IncidentTableProps) => {
   const { updateIncidentStatus, createIncident } = useMqtt()
+  const [loadingIds, setLoadingIds] = useState<Record<string, boolean>>({})
 
   const handleResolveIncident = async (e: MouseEvent, incidentId: string) => {
     e.stopPropagation()
-    await updateIncidentStatus(incidentId, StatusType.RESOLVED)
+    setLoadingIds(prev => ({ ...prev, [incidentId]: true }))
+    try {
+      await updateIncidentStatus(incidentId, StatusType.RESOLVED)
+    } finally {
+      setLoadingIds(prev => ({ ...prev, [incidentId]: false }))
+    }
   }
 
   const handleTryAgain = async (e: MouseEvent, incidentId: string) => {
     e.stopPropagation()
 
-    await createIncident({
-      id: incidentId,
-      status: StatusType.PENDING,
-      updatedAt: new Date().toISOString(),
-    })
+    setLoadingIds(prev => ({ ...prev, [incidentId]: true }))
+    try {
+      await createIncident({
+        id: incidentId,
+        status: StatusType.PENDING,
+        updatedAt: new Date().toISOString(),
+      })
+    } finally {
+      setLoadingIds(prev => ({ ...prev, [incidentId]: false }))
+    }
   }
 
   return (
@@ -77,8 +87,9 @@ const IncidentTable = ({ incidents, expandedRowId, toggleExpandedRow }: Incident
                     size="sm"
                     variant="outline"
                     onClick={e => handleResolveIncident(e, incident.id)}
+                    disabled={loadingIds[incident.id]}
                   >
-                    Resolve
+                    {loadingIds[incident.id] ? 'Resolving...' : 'Resolve'}
                   </Button>
                 )}
                 {incident.stillPending && (
@@ -90,8 +101,9 @@ const IncidentTable = ({ incidents, expandedRowId, toggleExpandedRow }: Incident
                       size="sm"
                       variant="outline"
                       onClick={e => handleTryAgain(e, incident.id)}
+                      disabled={loadingIds[incident.id]}
                     >
-                      Try Again
+                      {loadingIds[incident.id] ? 'Processing...' : 'Try Again'}
                     </Button>
                   </div>
                 )}

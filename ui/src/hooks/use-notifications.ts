@@ -25,15 +25,19 @@ export const useNotifications = () => {
 
     const notificationsList = Object.values(incidents)
       .map(incident => {
-        const notifId = `notification-${incident.id}`
+        // Include the status in the notification ID to make it unique per status change
+        const notifId = `notification-${incident.id}-${incident.status}-${incident.lastUpdatedAt}`
+
         return {
           id: notifId,
           uid: user.uid,
           title: `Incident ${incident.status}`,
           message: `${incident.type} at ${incident.address}`,
           read: readIds.includes(notifId),
-          start_time: new Date(incident.lastUpdatedAt || incident.lastUpdatedAt).getTime(),
+          start_time: new Date(incident.lastUpdatedAt).getTime(),
           type: 'incident_update',
+          // Store the incident ID separately so you can link to the incident
+          incidentId: incident.id,
         } as Notification
       })
       .sort((a, b) => b.start_time - a.start_time)

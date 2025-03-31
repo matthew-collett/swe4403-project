@@ -50,14 +50,12 @@ const DashboardPage = () => {
 
   return (
     <>
-      <PageTitle className="text-primary" route={getAppRoute(location.pathname)} />
+      <PageTitle route={getAppRoute(location.pathname)}>
+        <Button onClick={() => setShowForm(!showForm)}>
+          {showForm ? 'Cancel' : 'New Incident'}
+        </Button>
+      </PageTitle>
       <div className="space-y-5">
-        <div className="flex justify-end">
-          <Button onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Cancel' : 'New Incident'}
-          </Button>
-        </div>
-
         {showForm && <IncidentForm onSuccess={handleFormSuccess} />}
 
         <DashboardSection title="Active Incidents">
