@@ -24,7 +24,6 @@ help:
 	@echo " make setup - Set up both UI and API dependencies"
 	@echo " make ui - Start UI dev server"
 	@echo " make api - Start API server (port $(API_PORT))"
-	@echo " make all - Start both UI and API"
 	@echo " make clean - Clean build artifacts"
 
 # Set up both projects
