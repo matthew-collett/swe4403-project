@@ -62,11 +62,11 @@ export enum ResourceType {
   TECHNICIAN = 'Technician',
 
   // Unit
-  DECONTAMINATION_UNIT = 'Decontamination Unit',
-  ENGINEERING_UNIT = 'Engineering Unit',
-  HEAVY_EQUIPMENT = 'Heavy Equipment Unit',
-  MOBILE_MEDICAL_UNIT = 'Mobile Medical Unit',
-  PARAMEDIC_UNIT = 'Paramedic Unit',
+  DECONTAMINATION_UNIT = 'Decon Unit',
+  ENGINEERING_UNIT = 'Engineer',
+  HEAVY_EQUIPMENT = 'Heavy Equipment',
+  MOBILE_MEDICAL_UNIT = 'Mobile Medical',
+  PARAMEDIC_UNIT = 'Paramedic',
   PUMP_UNIT = 'Pump Unit',
 }
 
