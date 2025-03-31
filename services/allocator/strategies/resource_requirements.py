@@ -59,7 +59,7 @@ resource_requirements = {
         'LOW': {
             'Rescue Vehicle': 1,
             'Rescue  Personnel': 2,
-            'PumpUnit': 1
+            'Pump Unit': 1
         },
         'MEDIUM': {
             'Rescue Vehicle': 2,
