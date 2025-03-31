@@ -1,0 +1,1 @@
+Include UML diagrams (e.g., class diagrams, sequence diagrams) to visually represent the architecture. 

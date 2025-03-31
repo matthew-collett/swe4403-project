@@ -1,0 +1,1 @@
+Detail the Gang of Four (GoF) design patterns used, with examples.

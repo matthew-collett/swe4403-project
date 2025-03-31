@@ -1,11 +1,11 @@
-import { Separator } from '@/components/ui/separator'
 import { PageTitle } from '@/components'
+import { Separator } from '@/components/ui/separator'
 import { getAppRoute } from '@/config'
 const AboutUsPage = () => {
   return (
     <>
-      <PageTitle className="text-primary" route={getAppRoute(location.pathname)} />
-      <div className="px-4 py-8 space-y-6">
+      <PageTitle route={getAppRoute(location.pathname)} />
+      <div className="py-8 space-y-6">
         <section className="space-y-6">
           <h2 className="text-2xl font-bold text-primary">Who We Are</h2>
           <p className="text-muted-foreground max-w-4xl">

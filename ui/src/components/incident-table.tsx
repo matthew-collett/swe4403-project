@@ -13,6 +13,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useMqtt } from '@/context'
+import { auth } from '@/lib'
+import { api } from '@/lib/api'
 import { Incident, StatusType } from '@/types'
 
 interface IncidentTableProps {
@@ -40,6 +42,13 @@ const IncidentTable = ({ incidents, expandedRowId, toggleExpandedRow }: Incident
     e.stopPropagation()
 
     setLoadingIds(prev => ({ ...prev, [incidentId]: true }))
+    const token = await auth.currentUser?.getIdToken()
+    const { status } = await api.put(`incidents/${incidentId}`, token, {
+      stillPending: false,
+    })
+    if (status !== 200) {
+      return
+    }
     try {
       await createIncident({
         id: incidentId,

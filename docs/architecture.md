@@ -1,0 +1,1 @@
+Describe the chosen architectural pattern, design decisions, and overall system structure.
